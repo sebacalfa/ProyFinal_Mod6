@@ -1,0 +1,8 @@
+regla,descripcion,estado,detalle
+schema,Están presentes las 15 columnas esperadas,PASS,completo
+minimum_rows,Hay suficientes observaciones,PASS,"48,842 filas; mínimo=1,000"
+duplicate_ratio,Duplicados exactos no superan 1%,PASS,0.106%; máximo=1.0%
+target_complete,El target no contiene nulos,PASS,0 nulos
+target_domain,El target contiene exactamente las dos clases,PASS,"observadas=['<=50K', '>50K']"
+feature_missingness,Ninguna feature supera 10% de nulos,PASS,máximo=5.75% (occupation); límite=10%
+numeric_ranges,Variables numéricas respetan rangos plausibles,PASS,rangos válidos

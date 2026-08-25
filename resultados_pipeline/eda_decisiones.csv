@@ -1,0 +1,6 @@
+analisis,resultado,decision
+Balance de clases,clase minoritaria=23.93%,"Partición estratificada, class_weight='balanced' y F1/ROC-AUC además de accuracy."
+Valores faltantes,máximo=5.75% en occupation,No eliminar filas; imputar dentro del pipeline usando solo el conjunto de entrenamiento.
+Redundancia education,máximo de códigos por categoría=1,Conservar ambas representaciones para el modelo de árboles y vigilar su importancia; evitar crear una tercera copia.
+Ceros en variables de capital,gain=91.74%; loss=95.33%,No tratar ceros como faltantes; comparar modelos lineales y de árboles ante esta asimetría.
+Horas de trabajo,la tasa >50K cambia entre bandas de horas,Conservar hours-per-week y comparar modelos lineales con modelos que capturen relaciones no lineales.
