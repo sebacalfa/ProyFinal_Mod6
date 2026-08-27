@@ -1,0 +1,16 @@
+etapa,regla,estado,detalle
+raw,Esquema,APROBADA,faltantes=ninguna; adicionales=ninguna
+raw,Cantidad mínima,APROBADA,"filas=48,842; mínimo=30,000"
+raw,Duplicados,APROBADA,duplicados=52; permitidos_en_raw=True
+raw,Faltantes en predictores,APROBADA,celdas_faltantes=6465; permitidos=True
+raw,Target binario,APROBADA,"clases=[0, 1]"
+raw,Rangos de negocio,APROBADA,fuera_de_rango=ninguno
+raw,Consistencia education,APROBADA,categorías_inconsistentes=ninguna
+clean,Esquema,APROBADA,faltantes=ninguna; adicionales=ninguna
+clean,Cantidad mínima,APROBADA,"filas=48,790; mínimo=30,000"
+clean,Duplicados,APROBADA,duplicados=0; permitidos_en_raw=False
+clean,Faltantes en predictores,APROBADA,celdas_faltantes=6456; permitidos=True
+clean,Target binario,APROBADA,"clases=[0, 1]"
+clean,Rangos de negocio,APROBADA,fuera_de_rango=ninguno
+clean,Consistencia education,APROBADA,categorías_inconsistentes=ninguna
+transformed,Matriz numérica finita,APROBADA,train_finito=True; test_finito=True

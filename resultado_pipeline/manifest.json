@@ -1,0 +1,43 @@
+{
+  "created_at_utc": "2026-08-27T07:09:34.025674+00:00",
+  "config": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "min_category_frequency": 100,
+    "minimum_rows": 30000
+  },
+  "raw_shape": [
+    48842,
+    15
+  ],
+  "clean_shape": [
+    48790,
+    15
+  ],
+  "duplicates_removed": 52,
+  "train_shape": [
+    39032,
+    63
+  ],
+  "test_shape": [
+    9758,
+    63
+  ],
+  "target_rate_train": 0.23941893830703012,
+  "target_rate_test": 0.23939331830293092,
+  "artifacts": [
+    "X_test_raw.csv",
+    "X_test_transformado.csv",
+    "X_train_raw.csv",
+    "X_train_transformado.csv",
+    "adult_clean.csv",
+    "adult_raw.csv",
+    "manifest.json",
+    "modelo",
+    "nombres_features.csv",
+    "pipeline_features.joblib",
+    "reporte_calidad.csv",
+    "y_test.csv",
+    "y_train.csv"
+  ]
+}
