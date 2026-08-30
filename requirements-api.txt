@@ -1,0 +1,12 @@
+# Dependencias SOLO para servir el modelo via API (no para entrenar).
+# Version de scikit-learn fijada exactamente igual a la usada para entrenar
+# modelo_clasificacion.joblib (1.9.0), para evitar InconsistentVersionWarning
+# y posibles diferencias de resultado al des-serializar el pipeline.
+scikit-learn==1.9.0
+pandas==2.3.3
+numpy==2.4.4
+joblib==1.5.3
+
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
