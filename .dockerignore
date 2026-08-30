@@ -1,0 +1,24 @@
+# Reduce el "build context" que Docker envia al daemon: sin esto, Docker
+# empaqueta y envia estos archivos igual aunque el Dockerfile no los copie.
+__pycache__/
+*.pyc
+.venv/
+venv/
+.git/
+.pytest_cache/
+
+# Notebooks y su salida - no hacen falta para servir el modelo
+*.ipynb
+.ipynb_checkpoints/
+
+# MLflow: la app de inferencia no necesita el tracking server ni sus datos
+mlruns/
+mlflow.db
+miflow.db
+
+# Datasets y artefactos pesados que NO se copian al contenedor de la API
+# (el Dockerfile solo copia el .joblib y el manifest_modelo.json puntuales)
+resultado_pipeline/*.csv
+resultado_pipeline/**/*.csv
+resultado_pipeline/**/*.png
+src/adult_raw.csv

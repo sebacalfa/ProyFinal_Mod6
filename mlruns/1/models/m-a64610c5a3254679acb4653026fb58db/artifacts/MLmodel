@@ -1,0 +1,25 @@
+artifact_path: file:c:/Users/Usuario/Desktop/INCOEX - Ciencia de Datos/Modulo 6 -
+  Laboratoriio Machine Learning/Proyecto Final - Mod.6/ProyFinal_Mod6/mlruns/1/models/m-a64610c5a3254679acb4653026fb58db/artifacts
+flavors:
+  python_function:
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.7
+  sklearn:
+    code: code
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+mlflow_version: 3.15.1
+model_id: m-a64610c5a3254679acb4653026fb58db
+model_size_bytes: 49770561
+model_uuid: m-a64610c5a3254679acb4653026fb58db
+prompts: null
+run_id: 2248c935fec24943916d2197992ed3cb
+utc_time_created: '2026-08-27 22:13:01.414701'

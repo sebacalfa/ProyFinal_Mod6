@@ -1,0 +1,54 @@
+{
+  "created_at_utc": "2026-08-27T22:14:00.674742+00:00",
+  "selected_algorithm": "hist_gradient_boosting",
+  "selection_metric": "average_precision",
+  "selected_threshold": 0.6449999999999999,
+  "test_metrics": {
+    "threshold": 0.6449999999999999,
+    "precision": 0.6847988077496274,
+    "recall": 0.7868150684931506,
+    "f1": 0.7322709163346613,
+    "roc_auc": 0.9331584725436779,
+    "average_precision": 0.8406640269639136,
+    "balanced_accuracy": 0.8364148099135115
+  },
+  "data_version_sha256": "7dc84f5b49c0db8850e232cc6d0c73575aeea05c84e61e7f10bca9c49d8ec970",
+  "code_version_sha256": "e5fa21040b7a8a7b2a4812f7f303fac4145e3ff11914bacaae378f758798615f",
+  "data_config": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "min_category_frequency": 100,
+    "minimum_rows": 30000
+  },
+  "ml_config": {
+    "random_state": 42,
+    "cv_folds": 5,
+    "primary_metric": "average_precision",
+    "threshold_objective": "f1",
+    "minimum_precision": null,
+    "experiment_name": "adult_income_classification",
+    "tracking_uri": "sqlite:///mlflow.db",
+    "registered_model_name": "adult-income-classifier"
+  },
+  "mlflow_run_ids": {
+    "hist_gradient_boosting": "9f2fc91a2e9b42578731b8156b8c911c",
+    "random_forest": "2248c935fec24943916d2197992ed3cb",
+    "logistic_regression": "ccbbb95056c44bcdba7eedb17593ba61",
+    "dummy_baseline": "600d098ee7e8410e8dc08141c2a7878d",
+    "selected_model": "8e016c0c9b2443b68fa275cfe9c36268"
+  },
+  "artifacts": [
+    "busqueda_umbral_oof.csv",
+    "comparacion_modelos_cv.csv",
+    "comparacion_modelos_cv.png",
+    "configuracion_ml.json",
+    "curvas_roc_pr.png",
+    "manifest_modelo.json",
+    "matriz_confusion.csv",
+    "matriz_confusion.png",
+    "metricas_subgrupos_sex.csv",
+    "metricas_test.json",
+    "modelo_clasificacion.joblib",
+    "predicciones_test.csv"
+  ]
+}
