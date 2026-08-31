@@ -1,9 +1,9 @@
 # Imagen liviana: solo lo necesario para SERVIR el modelo, no para reentrenarlo.
-# Por eso no incluye jupyterlab, matplotlib, seaborn, scipy ni ucimlrepo:
+# Por eso no incluye jupyterlab, matplotlib, seaborn ni ucimlrepo:
 # esas dependencias son para entrenar/explorar, no para responder /predict.
 # Esto es justamente lo que hace que el contenedor funcione bien incluso
 # en computadoras de menor capacidad.
-FROM python:3.11-slim
+FROM python:3.13.14-slim
 
 WORKDIR /app
 
@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 
 # 2) Copiar SOLO el codigo fuente necesario para servir (no notebooks, no CSVs)
 COPY src/pipeline_datos.py src/pipeline_datos.py
+COPY src/monitoring.py src/monitoring.py
 COPY src/api/ src/api/
 
 # 3) Copiar SOLO el modelo entrenado y su manifiesto (no todo resultado_pipeline,
