@@ -280,15 +280,13 @@ El reporte completo se encuentra en `resultado_pipeline/modelo/metricas_subgrupo
 
 ## 15. Docker
 
-**Estado: pendiente.** El proyecto todavía no contiene un `Dockerfile`; por lo tanto, no se incluyen comandos de construcción que aparenten ser funcionales. Para completar el entregable será necesario contenerizar la futura API junto con el modelo y sus dependencias.
+ - Se instala Docker Desktop en la computadora.
+ - Se instala Docker Build:  docker build -t grupo2-mlops 
+ - Se ejecuta el Docker Run:  docker run -p 8000:8000 grupo2-mlops
+ - Se ejecuta la API en localhost:8000 
+ - Se hace una primera validación de los resultados del modelo en la API, cambiando variables: age, capital-gain, workclass y relationship status and marital-status.
 
-La validación mínima esperada cuando se implemente será:
 
-```text
-docker build -> imagen reproducible
-docker run   -> servicio disponible
-POST /predict -> predicción válida
-```
 
 ## 16. API de inferencia
 
