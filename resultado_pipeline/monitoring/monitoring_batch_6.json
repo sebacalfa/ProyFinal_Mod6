@@ -1,0 +1,210 @@
+{
+  "batch_id": 6,
+  "drift_strength": 1.0,
+  "data_monitoring": {
+    "reference_rows": 48790,
+    "production_rows": 1000,
+    "numeric_features": {
+      "age": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 38.652797704447636,
+        "production_mean": 51.189,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 2.740781108655625,
+        "psi_level": "drift_alto",
+        "ks_statistic": 0.3340883377741341,
+        "ks_pvalue": 5.086652819062881e-98,
+        "ks_drift_detected": true,
+        "wasserstein_distance": 12.536202295552368
+      },
+      "fnlwgt": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 189668.9993646239,
+        "production_mean": 186679.352,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.009420157954233954,
+        "psi_level": "sin_drift_relevante",
+        "ks_statistic": 0.03218507890961264,
+        "ks_pvalue": 0.25646629831004975,
+        "ks_drift_detected": false,
+        "wasserstein_distance": 4074.765512195112
+      },
+      "education-num": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 10.07880713260914,
+        "production_mean": 9.964,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.008877547847018536,
+        "psi_level": "sin_drift_relevante",
+        "ks_statistic": 0.02297601967616314,
+        "ks_pvalue": 0.670144913164773,
+        "ks_drift_detected": false,
+        "wasserstein_distance": 0.11739577782332444
+      },
+      "capital-gain": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 1080.21768805083,
+        "production_mean": 8801.48,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 1.2214110280878503,
+        "psi_level": "drift_alto",
+        "ks_statistic": 0.9172986267677803,
+        "ks_pvalue": 0.0,
+        "ks_drift_detected": true,
+        "wasserstein_distance": 7721.262311949171
+      },
+      "capital-loss": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 87.59557286329166,
+        "production_mean": 90.997,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.011973781206767608,
+        "psi_level": "sin_drift_relevante",
+        "ks_statistic": 0.0066562820250051224,
+        "ks_pvalue": 0.9999999999799423,
+        "ks_drift_detected": false,
+        "wasserstein_distance": 7.234066202090628
+      },
+      "hours-per-week": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_mean": 40.42588645214183,
+        "production_mean": 55.005,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 2.5810397353440973,
+        "psi_level": "drift_alto",
+        "ks_statistic": 0.6742363189178111,
+        "ks_pvalue": 0.0,
+        "ks_drift_detected": true,
+        "wasserstein_distance": 14.579113547858167
+      }
+    },
+    "categorical_features": {
+      "workclass": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.057286329165812666,
+        "production_missing_rate": 0.06,
+        "psi": 0.00720856846127709,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "education": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.016703953511977933,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "marital-status": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.008737414838835875,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "occupation": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.05749128919860627,
+        "production_missing_rate": 0.06,
+        "psi": 0.024676409822004117,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "relationship": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.003624882468198188,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "race": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 0.006039956222646554,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "sex": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.0,
+        "production_missing_rate": 0.0,
+        "psi": 2.9244455987338193e-05,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      },
+      "native-country": {
+        "status": "ok",
+        "reference_count": 48790,
+        "production_count": 1000,
+        "reference_missing_rate": 0.01754457880713261,
+        "production_missing_rate": 0.014,
+        "psi": 0.06782449699191145,
+        "psi_level": "sin_drift_relevante",
+        "unknown_categories": [],
+        "unknown_category_count": 0
+      }
+    },
+    "high_drift_features": [
+      "age",
+      "capital-gain",
+      "hours-per-week"
+    ],
+    "drift_detected": true
+  },
+  "model_monitoring": {
+    "status": "evaluated",
+    "rows": 1000,
+    "valid_predictions": 1000,
+    "positive_prediction_rate": 0.653,
+    "average_probability": 0.6731827422137449,
+    "probability_std": 0.42130245299770813,
+    "ground_truth_available": true,
+    "evaluated_rows": 1000,
+    "precision": 0.2879019908116386,
+    "recall": 0.7642276422764228,
+    "f1": 0.41824249165739713,
+    "roc_auc": 0.6422279010588514
+  }
+}
