@@ -36,10 +36,10 @@ El script de ingesta descarga los datos desde UCI, por lo que no es obligatorio 
 | Modelado y experimentación | Implementado | `src/pipeline_ML.py` y notebook J |
 | MLflow Tracking | Implementado | `mlflow.db`, `mlruns/` y registro desde el pipeline |
 | Model Registry | Implementado en el entrenamiento | Nombre registrado: `adult-income-classifier` |
-| Docker | Pendiente | No existe `Dockerfile` actualmente |
-| API de inferencia | Pendiente | No existe aplicación FastAPI actualmente |
-| Pruebas automatizadas | Pendiente | No existe carpeta `tests/` actualmente |
-| Monitoreo y simulación de drift | Pendiente | No existe módulo de monitoreo actualmente |
+| Docker | Implementado | `Dockerfile` y `requirements-api.txt` |
+| API de inferencia | Implementada | `src/api/main.py` con `/health`, `/predict` y `/monitoring/system` |
+| Pruebas automatizadas | Implementadas | `tests/test_data.py`, `tests/test_model.py`, `tests/test_api.py` y `tests/test_monitoring.py` |
+| Monitoreo y simulación de drift | Implementado | `src/monitoring.py` y `src/simulate_production.py` |
 
 Esta tabla describe los archivos presentes en el proyecto al momento de elaborar este README; evita confundir entregables planeados con componentes ya implementados.
 
@@ -115,7 +115,7 @@ Los archivos dentro de `resultado_pipeline/` y `mlruns/` son salidas generadas. 
 
 ### Requisitos previos
 
-- Python 3.11, 3.12 o 3.13.
+- Python 3.13.14 (versión utilizada por los notebooks y Docker).
 - Acceso a internet únicamente si se descargará nuevamente el dataset.
 - Git y un entorno virtual son recomendados.
 
@@ -124,7 +124,7 @@ Los archivos dentro de `resultado_pipeline/` y `mlruns/` son salidas generadas. 
 Desde la carpeta raíz del proyecto:
 
 ```powershell
-py -m venv .venv
+py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
@@ -280,19 +280,24 @@ El reporte completo se encuentra en `resultado_pipeline/modelo/metricas_subgrupo
 
 ## 15. Docker
 
-**Estado: pendiente.** El proyecto todavía no contiene un `Dockerfile`; por lo tanto, no se incluyen comandos de construcción que aparenten ser funcionales. Para completar el entregable será necesario contenerizar la futura API junto con el modelo y sus dependencias.
+La imagen contiene la API, el pipeline entrenado, el manifiesto y las dependencias de inferencia:
 
-La validación mínima esperada cuando se implemente será:
-
-```text
-docker build -> imagen reproducible
-docker run   -> servicio disponible
-POST /predict -> predicción válida
+```powershell
+docker build -t adult-income-api .
+docker run --rm -p 8001:8000 adult-income-api
 ```
+
+La documentación interactiva queda disponible en `http://127.0.0.1:8001/docs`. El puerto 8001 pertenece al equipo y el 8000 permanece dentro del contenedor.
 
 ## 16. API de inferencia
 
-**Estado: pendiente.** Se recomienda implementar FastAPI con un endpoint `POST /predict` que valide las variables de entrada y devuelva, como mínimo:
+La aplicación está en `src/api/main.py`. Carga una sola vez el pipeline completo y expone `GET /health`, `POST /predict` y `GET /monitoring/system`. Para ejecutarla localmente:
+
+```powershell
+python -m uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8001
+```
+
+La entrada valida campos obligatorios, tipos, campos adicionales, cadenas vacías y rangos de negocio. La respuesta contiene:
 
 ```json
 {
@@ -302,27 +307,67 @@ POST /predict -> predicción válida
 }
 ```
 
-La API deberá cargar el pipeline completo, no recrear manualmente las transformaciones.
+La API carga `resultado_pipeline/modelo/modelo_clasificacion.joblib`; no recrea manualmente las transformaciones.
 
 ## 17. Testing
 
-**Estado: pendiente.** La carpeta `tests/` deberá cubrir como mínimo:
+La suite se divide por responsabilidad:
 
-- Esquema, tipos, rangos, faltantes y variables obligatorias.
-- Predicción válida ante un input válido.
-- Rechazo claro de categorías, tipos o esquemas inválidos cuando corresponda.
-- Respuesta HTTP 200 y esquema de salida de la futura API.
-- Respuesta controlada ante solicitudes inválidas.
+- `tests/test_data.py`: esquema, tipos, rangos, valores no finitos, target y duplicados.
+- `tests/test_model.py`: carga del modelo, predicción binaria, probabilidades y determinismo.
+- `tests/test_api.py`: health, predicción y rechazo HTTP 422 de entradas incorrectas.
+- `tests/test_monitoring.py`: PSI, drift, métricas del modelo y métricas operativas de la API.
+
+Para instalar y ejecutar las pruebas desde un entorno virtual activado:
+
+```powershell
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+Si falta `adult_clean.csv`, ejecute primero el pipeline de datos. Si falta `modelo_clasificacion.joblib`, ejecute `J_Modelo_y_Experimentacion.ipynb`.
 
 ## 18. Monitoreo y drift
 
-**Estado: pendiente.** La implementación final debe distinguir:
+El monitoreo implementado distingue:
 
 - Monitoreo del sistema: latencia, throughput, errores y disponibilidad.
-- Monitoreo de datos: comparación entre referencia y producción mediante PSI u otra prueba justificada.
+- Monitoreo de datos: PSI, Kolmogorov-Smirnov, distancia Wasserstein y categorías desconocidas.
 - Monitoreo del modelo: evolución de precision, recall, F1 y AUC cuando exista ground truth.
 - Simulación de drift en varios lotes de producción.
-- Simulación de problemas de calidad sin modificar permanentemente el dataset original.
+
+Instalación y pruebas específicas:
+
+```powershell
+pip install -r requirements-monitoring.txt
+pytest tests/test_monitoring.py -v
+```
+
+Generación reproducible de seis lotes de 1.000 registros:
+
+```powershell
+python -m src.simulate_production `
+    --batches 6 `
+    --batch-size 1000 `
+    --random-state 42
+```
+
+Generación del reporte general:
+
+```powershell
+python -m src.monitoring `
+    --reference resultado_pipeline/adult_clean.csv `
+    --production resultado_pipeline/monitoring/production_batch.csv `
+    --output resultado_pipeline/monitoring/monitoring_report.json
+```
+
+Con la API en ejecución, las métricas operativas se consultan así:
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:8001/monitoring/system" `
+    -Method Get
+```
 
 El reentrenamiento no debe activarse únicamente porque cambie una distribución. Debe combinar evidencia de drift, degradación de desempeño, suficiente información nueva y aprobación operativa.
 
@@ -364,13 +409,12 @@ Agregar antes de la entrega:
 
 ## 22. Próximos pasos para completar el proyecto
 
-1. Implementar y probar la API de inferencia.
-2. Agregar pruebas de datos, modelo y API.
-3. Crear un `Dockerfile` funcional y verificarlo en una máquina limpia.
-4. Implementar monitoreo, contaminación de batches y simulación de drift.
-5. Documentar la estrategia y lógica de reentrenamiento.
-6. Añadir el diagrama final de arquitectura.
-7. Completar integrantes, URL del repositorio y comandos definitivos de demo.
+1. Ejecutar la suite automatizada y conservar la evidencia.
+2. Verificar la imagen Docker en una máquina limpia.
+3. Implementar monitoreo, contaminación de batches y simulación de drift.
+4. Documentar la estrategia y lógica de reentrenamiento.
+5. Añadir el diagrama final de arquitectura.
+6. Completar integrantes, URL del repositorio y comandos definitivos de demo.
 
 ## 23. Referencias
 
