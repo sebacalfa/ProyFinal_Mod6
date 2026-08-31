@@ -1,0 +1,6 @@
+# Dependencias para desarrollo, notebooks y pruebas; no se instalan en la imagen final.
+-r requirements-monitoring.txt
+
+mlflow>=3.0,<4.0
+ipykernel>=6.29,<8.0
+jupyter>=1.1,<2.0

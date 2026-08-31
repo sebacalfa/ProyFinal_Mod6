@@ -1,0 +1,74 @@
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.13.14, pytest-8.3.3, pluggy-1.6.0 -- c:\Users\c3283\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: c:\Users\c3283\Desktop\INCOEX\respositorio25-08-2026
+plugins: anyio-4.14.2
+[1mcollecting ... [0mcollected 65 items
+
+tests/test_api.py::test_health_returns_200 [32mPASSED[0m[33m                        [  1%][0m
+tests/test_api.py::test_health_returns_model_metadata [32mPASSED[0m[33m             [  3%][0m
+tests/test_api.py::test_valid_request_returns_200 [32mPASSED[0m[33m                 [  4%][0m
+tests/test_api.py::test_valid_request_returns_expected_schema [32mPASSED[0m[33m     [  6%][0m
+tests/test_api.py::test_prediction_is_binary [32mPASSED[0m[33m                      [  7%][0m
+tests/test_api.py::test_probability_is_valid [32mPASSED[0m[33m                      [  9%][0m
+tests/test_api.py::test_model_version_is_valid [32mPASSED[0m[33m                    [ 10%][0m
+tests/test_api.py::test_out_of_range_values_return_422[age-16] [32mPASSED[0m[33m    [ 12%][0m
+tests/test_api.py::test_out_of_range_values_return_422[age-91] [32mPASSED[0m[33m    [ 13%][0m
+tests/test_api.py::test_out_of_range_values_return_422[fnlwgt-0] [32mPASSED[0m[33m  [ 15%][0m
+tests/test_api.py::test_out_of_range_values_return_422[education-num-0] [32mPASSED[0m[33m [ 16%][0m
+tests/test_api.py::test_out_of_range_values_return_422[education-num-17] [32mPASSED[0m[33m [ 18%][0m
+tests/test_api.py::test_out_of_range_values_return_422[capital-gain--1] [32mPASSED[0m[33m [ 20%][0m
+tests/test_api.py::test_out_of_range_values_return_422[capital-gain-100000] [32mPASSED[0m[33m [ 21%][0m
+tests/test_api.py::test_out_of_range_values_return_422[capital-loss--1] [32mPASSED[0m[33m [ 23%][0m
+tests/test_api.py::test_out_of_range_values_return_422[capital-loss-4357] [32mPASSED[0m[33m [ 24%][0m
+tests/test_api.py::test_out_of_range_values_return_422[hours-per-week-0] [32mPASSED[0m[33m [ 26%][0m
+tests/test_api.py::test_out_of_range_values_return_422[hours-per-week-100] [32mPASSED[0m[33m [ 27%][0m
+tests/test_api.py::test_out_of_range_values_return_422[workclass-] [32mPASSED[0m[33m [ 29%][0m
+tests/test_api.py::test_missing_required_field_returns_422[age] [32mPASSED[0m[33m   [ 30%][0m
+tests/test_api.py::test_missing_required_field_returns_422[workclass] [32mPASSED[0m[33m [ 32%][0m
+tests/test_api.py::test_missing_required_field_returns_422[fnlwgt] [32mPASSED[0m[33m [ 33%][0m
+tests/test_api.py::test_missing_required_field_returns_422[education] [32mPASSED[0m[33m [ 35%][0m
+tests/test_api.py::test_missing_required_field_returns_422[education-num] [32mPASSED[0m[33m [ 36%][0m
+tests/test_api.py::test_missing_required_field_returns_422[marital-status] [32mPASSED[0m[33m [ 38%][0m
+tests/test_api.py::test_missing_required_field_returns_422[occupation] [32mPASSED[0m[33m [ 40%][0m
+tests/test_api.py::test_missing_required_field_returns_422[relationship] [32mPASSED[0m[33m [ 41%][0m
+tests/test_api.py::test_missing_required_field_returns_422[race] [32mPASSED[0m[33m  [ 43%][0m
+tests/test_api.py::test_missing_required_field_returns_422[sex] [32mPASSED[0m[33m   [ 44%][0m
+tests/test_api.py::test_missing_required_field_returns_422[capital-gain] [32mPASSED[0m[33m [ 46%][0m
+tests/test_api.py::test_missing_required_field_returns_422[capital-loss] [32mPASSED[0m[33m [ 47%][0m
+tests/test_api.py::test_missing_required_field_returns_422[hours-per-week] [32mPASSED[0m[33m [ 49%][0m
+tests/test_api.py::test_missing_required_field_returns_422[native-country] [32mPASSED[0m[33m [ 50%][0m
+tests/test_api.py::test_wrong_numeric_type_returns_422 [32mPASSED[0m[33m            [ 52%][0m
+tests/test_api.py::test_empty_body_returns_422 [32mPASSED[0m[33m                    [ 53%][0m
+tests/test_api.py::test_extra_field_returns_422 [32mPASSED[0m[33m                   [ 55%][0m
+tests/test_api.py::test_get_predict_is_not_allowed [32mPASSED[0m[33m                [ 56%][0m
+tests/test_data.py::test_schema_has_exact_columns [32mPASSED[0m[33m                 [ 58%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[age] [32mPASSED[0m[33m  [ 60%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[fnlwgt] [32mPASSED[0m[33m [ 61%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[education-num] [32mPASSED[0m[33m [ 63%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[capital-gain] [32mPASSED[0m[33m [ 64%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[capital-loss] [32mPASSED[0m[33m [ 66%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[hours-per-week] [32mPASSED[0m[33m [ 67%][0m
+tests/test_data.py::test_numeric_columns_have_numeric_dtype[income] [32mPASSED[0m[33m [ 69%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[age-limits0] [32mPASSED[0m[33m [ 70%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[fnlwgt-limits1] [32mPASSED[0m[33m [ 72%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[education-num-limits2] [32mPASSED[0m[33m [ 73%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[capital-gain-limits3] [32mPASSED[0m[33m [ 75%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[capital-loss-limits4] [32mPASSED[0m[33m [ 76%][0m
+tests/test_data.py::test_numeric_columns_respect_business_ranges[hours-per-week-limits5] [32mPASSED[0m[33m [ 78%][0m
+tests/test_data.py::test_numeric_columns_have_no_missing_or_infinite_values [32mPASSED[0m[33m [ 80%][0m
+tests/test_data.py::test_target_is_binary [32mPASSED[0m[33m                         [ 81%][0m
+tests/test_data.py::test_clean_data_has_no_duplicate_rows [32mPASSED[0m[33m         [ 83%][0m
+tests/test_model.py::test_model_file_exists [32mPASSED[0m[33m                       [ 84%][0m
+tests/test_model.py::test_model_loads_without_error [32mPASSED[0m[33m               [ 86%][0m
+tests/test_model.py::test_model_exposes_predict [32mPASSED[0m[33m                   [ 87%][0m
+tests/test_model.py::test_model_exposes_predict_proba [32mPASSED[0m[33m             [ 89%][0m
+tests/test_model.py::test_valid_input_returns_one_prediction [32mPASSED[0m[33m      [ 90%][0m
+tests/test_model.py::test_valid_input_returns_binary_prediction [32mPASSED[0m[33m   [ 92%][0m
+tests/test_model.py::test_model_returns_two_probabilities [32mPASSED[0m[33m         [ 93%][0m
+tests/test_model.py::test_probabilities_are_between_zero_and_one [32mPASSED[0m[33m  [ 95%][0m
+tests/test_model.py::test_probabilities_sum_to_one [32mPASSED[0m[33m                [ 96%][0m
+tests/test_model.py::test_prediction_is_deterministic [32mPASSED[0m[33m             [ 98%][0m
+tests/test_model.py::test_probabilities_are_deterministic [32mPASSED[0m[33m         [100%][0m
+
+[33m======================= [32m65 passed[0m, [33m[1m3 warnings[0m[33m in 19.58s[0m[33m =======================[0m
