@@ -40,6 +40,7 @@ El script de ingesta descarga los datos desde UCI, por lo que no es obligatorio 
 | API de inferencia | Implementada | `src/api/main.py` con `/health`, `/predict` y `/monitoring/system` |
 | Pruebas automatizadas | Implementadas | `tests/test_data.py`, `tests/test_model.py`, `tests/test_api.py` y `tests/test_monitoring.py` |
 | Monitoreo y simulación de drift | Implementado | `src/monitoring.py` y `src/simulate_production.py` |
+| Estrategia de reentrenamiento (trigger) | Implementado | `src/retrain_trigger.py`, `tests/test_retrain_trigger.py` y `resultado_pipeline/monitoring/retrain_decision.json` |
 
 Esta tabla describe los archivos presentes en el proyecto al momento de elaborar este README; evita confundir entregables planeados con componentes ya implementados.
 
@@ -317,6 +318,7 @@ La suite se divide por responsabilidad:
 - `tests/test_model.py`: carga del modelo, predicción binaria, probabilidades y determinismo.
 - `tests/test_api.py`: health, predicción y rechazo HTTP 422 de entradas incorrectas.
 - `tests/test_monitoring.py`: PSI, drift, métricas del modelo y métricas operativas de la API.
+- `tests/test_retrain_trigger.py`: lógica de decisión de reentrenamiento (PSI + degradación de desempeño + volumen mínimo).
 
 Para instalar y ejecutar las pruebas desde un entorno virtual activado:
 
@@ -369,7 +371,33 @@ Invoke-RestMethod `
     -Method Get
 ```
 
-El reentrenamiento no debe activarse únicamente porque cambie una distribución. Debe combinar evidencia de drift, degradación de desempeño, suficiente información nueva y aprobación operativa.
+El reentrenamiento no debe activarse únicamente porque cambie una distribución. Debe combinar evidencia de drift, degradación de desempeño, suficiente información nueva y aprobación operativa (Data Drift ≠ Model Degradation).
+
+### 18.1 Lógica de reentrenamiento (`src/retrain_trigger.py`)
+
+Esta regla queda implementada y probada en `src/retrain_trigger.py`. Para cada lote evalúa tres condiciones y solo recomienda reentrenar si las tres se cumplen a la vez:
+
+- **Drift**: el PSI máximo entre las features numéricas y categóricas supera `psi_threshold = 0.25` (mismo corte que `monitoring._psi_level` usa para clasificar "drift_alto").
+- **Degradación de desempeño**: la métrica `f1` (con ground truth disponible) cae por debajo de `minimum_performance = 0.60`.
+- **Volumen mínimo**: el lote tiene al menos `minimum_production_rows = 500` filas (la mitad del tamaño de lote usado por `simulate_production.py`).
+
+La recomendación final siempre incluye `requires_manual_approval: true`: el módulo nunca dispara un reentrenamiento automático, solo lo señala para aprobación operativa.
+
+Ejecución sobre los seis lotes reales generados por `simulate_production.py`:
+
+```powershell
+python -m src.retrain_trigger `
+    --batches-dir resultado_pipeline/monitoring `
+    --output resultado_pipeline/monitoring/retrain_decision.json
+```
+
+Resultado obtenido con los lotes actuales (`resultado_pipeline/monitoring/retrain_decision.json`): los lotes 1 y 2 (drift_strength 0.0 y 0.2) quedan en `NO_RETRAIN_NEEDED`, y a partir del lote 3 (drift_strength ≥ 0.4, donde el PSI de `hours-per-week`/`age` supera el umbral y el F1 cae por debajo de 0.60) la recomendación pasa a `RETRAIN_RECOMMENDED`.
+
+Pruebas específicas:
+
+```powershell
+pytest tests/test_retrain_trigger.py -v
+```
 
 ## 19. Reproducibilidad y trazabilidad
 
@@ -409,12 +437,12 @@ Agregar antes de la entrega:
 
 ## 22. Próximos pasos para completar el proyecto
 
-1. Ejecutar la suite automatizada y conservar la evidencia.
-2. Verificar la imagen Docker en una máquina limpia.
-3. Implementar monitoreo, contaminación de batches y simulación de drift.
-4. Documentar la estrategia y lógica de reentrenamiento.
-5. Añadir el diagrama final de arquitectura.
-6. Completar integrantes, URL del repositorio y comandos definitivos de demo.
+Monitoreo, simulación de drift y estrategia/lógica de reentrenamiento ya están implementados y evidenciados (ver secciones 18 y 18.1). Queda pendiente:
+
+1. Ejecutar la suite automatizada completa (`pytest tests/ -v`) en el entorno de cada integrante y conservar la evidencia.
+2. Verificar la imagen Docker en una máquina limpia (de menor capacidad que la usada para desarrollarla).
+3. Añadir el diagrama final de arquitectura.
+4. Completar integrantes, URL del repositorio y comandos definitivos de demo.
 
 ## 23. Referencias
 
