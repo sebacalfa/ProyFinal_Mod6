@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-09-02T03:21:46.347403+00:00",
+  "created_at_utc": "2026-09-02T18:31:57.163500+00:00",
   "selected_algorithm": "hist_gradient_boosting",
   "selection_metric": "average_precision",
   "selected_threshold": 0.6449999999999999,
@@ -13,7 +13,7 @@
     "balanced_accuracy": 0.8364148099135115
   },
   "data_version_sha256": "7dc84f5b49c0db8850e232cc6d0c73575aeea05c84e61e7f10bca9c49d8ec970",
-  "code_version_sha256": "54570ca6a6d43023d4f1d233cd0c7b6c54f8cc2500a72a1e13d331ca15465aca",
+  "code_version_sha256": "f18c3eea4060019107a9aea21d0c50dec8bb7e42a25323d05e3f3930902f304f",
   "data_config": {
     "test_size": 0.2,
     "random_state": 42,
@@ -29,27 +29,112 @@
     "experiment_name": "adult_income_classification",
     "tracking_uri": "sqlite:///mlflow.db",
     "artifact_location": null,
-    "registered_model_name": "adult-income-classifier"
+    "registered_model_name": "adult-income-classifier",
+    "promotion_policy": {
+      "minimum_cv_average_precision": 0.8,
+      "minimum_cv_f1": 0.65,
+      "minimum_gain_over_baseline": 0.1,
+      "maximum_cv_average_precision_std": 0.03
+    }
   },
   "mlflow_run_ids": {
-    "hist_gradient_boosting": "c7f6b8da6ceb4a7b986e819bd5c0bf42",
-    "random_forest": "596e43c24a654af389488f3c2880d22c",
-    "logistic_regression": "41e95bb22793432c808098aac899529d",
-    "dummy_baseline": "71615903869a4aeaaef6080c1dbc8037",
-    "selected_model": "7573d21e8ae34531a05530b09e591eb7"
+    "hist_gradient_boosting": "e6ec2aabf8c2441480a950e4d2868831",
+    "random_forest": "f72599e3669344c2a5da8cde2cbc3a33",
+    "logistic_regression": "02eed309a9ca44bdbad21a9b278d337b",
+    "dummy_baseline": "b7cd24096fa741deb6197022ecaa854e",
+    "selected_model": "e7063d1311d34e72914555d3d9b65127"
+  },
+  "registry": {
+    "model_name": "adult-income-classifier",
+    "version": "8",
+    "run_id": "e7063d1311d34e72914555d3d9b65127",
+    "model_uri": "models:/adult-income-classifier/8",
+    "policy": {
+      "minimum_cv_average_precision": 0.8,
+      "minimum_cv_f1": 0.65,
+      "minimum_gain_over_baseline": 0.1,
+      "maximum_cv_average_precision_std": 0.03
+    },
+    "policy_version": "academic-v1",
+    "selection_rule": "Mayor media de la métrica primaria en CV; empate por nombre de algoritmo.",
+    "scope": "Aprobación académica local. El test se reporta, no selecciona ni ajusta los gates.",
+    "events": [
+      {
+        "stage": "Experiment",
+        "status": "completed",
+        "at_utc": "2026-09-02T18:31:56.261176+00:00"
+      },
+      {
+        "stage": "Candidate",
+        "status": "selected",
+        "at_utc": "2026-09-02T18:31:56.370309+00:00",
+        "algorithm": "hist_gradient_boosting"
+      },
+      {
+        "stage": "Validation",
+        "status": "running",
+        "at_utc": "2026-09-02T18:31:56.456294+00:00"
+      },
+      {
+        "stage": "Validation",
+        "status": "passed",
+        "at_utc": "2026-09-02T18:31:56.937553+00:00"
+      },
+      {
+        "stage": "Production",
+        "status": "approved",
+        "at_utc": "2026-09-02T18:31:57.056234+00:00",
+        "alias": "production"
+      }
+    ],
+    "stage": "Production",
+    "status": "approved",
+    "decision": {
+      "passed": true,
+      "checks": {
+        "cv_average_precision": {
+          "actual": 0.8264062069026981,
+          "minimum": 0.8,
+          "passed": true
+        },
+        "cv_f1": {
+          "actual": 0.7145247586571487,
+          "minimum": 0.65,
+          "passed": true
+        },
+        "gain_over_baseline": {
+          "actual": 0.5869872676527866,
+          "minimum": 0.1,
+          "passed": true
+        },
+        "cv_average_precision_std": {
+          "actual": 0.009684425312091755,
+          "maximum": 0.03,
+          "passed": true
+        }
+      }
+    },
+    "registry_roundtrip_passed": true,
+    "export_directory": "C:\\Users\\c3283\\Desktop\\INCOEX\\respositorio25-08-2026\\resultado_pipeline\\modelo\\production\\version_8"
   },
   "artifacts": [
     "busqueda_umbral_oof.csv",
+    "candidates",
     "comparacion_modelos_cv.csv",
     "comparacion_modelos_cv.png",
     "configuracion_ml.json",
     "curvas_roc_pr.png",
+    "data_lineage.json",
+    "environment.json",
+    "feature_schema.json",
     "manifest_modelo.json",
     "matriz_confusion.csv",
     "matriz_confusion.png",
     "metricas_subgrupos_sex.csv",
     "metricas_test.json",
     "modelo_clasificacion.joblib",
-    "predicciones_test.csv"
+    "predicciones_test.csv",
+    "production",
+    "registry_lifecycle.json"
   ]
 }

@@ -1,0 +1,18 @@
+.tracking-evidence,.registry-proof{grid-column:1/-1;min-width:0}
+.evidence-scroll{overflow-x:auto;margin-top:14px}
+.evidence-table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+.evidence-table th,.evidence-table td{padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.evidence-table thead th{background:#f5f8fc;color:var(--muted);font-size:11px;font-weight:700}
+.evidence-table tbody th{font-weight:600;min-width:160px}
+.evidence-table small{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:5px}
+.evidence-files{display:flex;flex-wrap:wrap;gap:6px;min-width:220px}
+.evidence-files span{font-size:11px;border-radius:5px;padding:4px 7px;white-space:nowrap}
+.evidence-files .available{color:#176443;background:#edf8f1}
+.evidence-files .missing{color:#944f14;background:#fff2dd}
+.evidence-notice{padding:12px;background:#fff2dd;color:#944f14;border-radius:8px}
+.evidence-history{margin-top:22px}
+.evidence-history summary{cursor:pointer;font-weight:700;padding:10px 0}
+.registry-proof h3{margin:26px 0 10px;font-size:15px}
+.registry-proof .trace-grid strong{overflow-wrap:anywhere}
+.registry-proof .artifact-list{flex-wrap:wrap}
+@media(max-width:720px){.evidence-table{min-width:530px}.tracking-evidence .evidence-table{min-width:700px}.registry-proof .card-head,.tracking-evidence .card-head{gap:12px;flex-wrap:wrap}.registry-proof .registry-steps{overflow-x:auto}.registry-proof .registry-steps>div{min-width:105px}}

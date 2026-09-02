@@ -1,0 +1,10 @@
+{
+  "adult_raw.csv": "7bf09a7484d84f92c7e69582078bb01b2f7c4862c8fb27990c0dd848a8a029f4",
+  "adult_clean.csv": "7dc84f5b49c0db8850e232cc6d0c73575aeea05c84e61e7f10bca9c49d8ec970",
+  "X_train_raw.csv": "90ba97d30ee94cd8e1c85979be887d2883c36232f0e44e66e9c378ce82a828c2",
+  "X_test_raw.csv": "b4bc1b2fed10bc6236250d1ba5f140045f2d2620efe9624ebef48a58d4a54602",
+  "y_train.csv": "dedf10aadb6262b3666437737d3cd3ab90fc37d6853d58bf4e8c1dd4f30e042c",
+  "y_test.csv": "fa2d4202dd35db819c446210b8ccdedef1913e56991268aef5a4421cfeb3c82d",
+  "nombres_features.csv": "4a5236a39aca10a436b9a038ba462e8e4c453697661ce7fdce7afd08aaa7d2be",
+  "manifest.json": "51e5881b17a0ec93eae1c5c796e9b0713c38c75c020a4eb4868f3b5414e6e92f"
+}

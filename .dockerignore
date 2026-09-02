@@ -13,6 +13,9 @@ venv/
 
 # MLflow: la app de inferencia no necesita el tracking server ni sus datos
 mlruns/
+mlartifacts/
+backups/
+.notebook_runtime/
 mlflow.db
 miflow.db
 

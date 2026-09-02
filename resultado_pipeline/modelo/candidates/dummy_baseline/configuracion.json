@@ -1,0 +1,34 @@
+{
+  "algorithm": "dummy_baseline",
+  "hyperparameters": {
+    "constant": null,
+    "random_state": null,
+    "strategy": "prior"
+  },
+  "data_config": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "min_category_frequency": 100,
+    "minimum_rows": 30000
+  },
+  "ml_config": {
+    "random_state": 42,
+    "cv_folds": 5,
+    "primary_metric": "average_precision",
+    "threshold_objective": "f1",
+    "minimum_precision": null,
+    "experiment_name": "adult_income_classification",
+    "tracking_uri": "sqlite:///mlflow.db",
+    "artifact_location": null,
+    "registered_model_name": "adult-income-classifier",
+    "promotion_policy": {
+      "minimum_cv_average_precision": 0.8,
+      "minimum_cv_f1": 0.65,
+      "minimum_gain_over_baseline": 0.1,
+      "maximum_cv_average_precision_std": 0.03
+    }
+  },
+  "evaluation_dataset": "out_of_fold_train",
+  "threshold": 0.5,
+  "metrics_definition": "Promedios por fold; la matriz agrupa todas las predicciones OOF."
+}

@@ -1,0 +1,12 @@
+{
+  "directory": "version_8",
+  "registered_model_name": "adult-income-classifier",
+  "registered_model_version": "8",
+  "model_uri": "models:/adult-income-classifier/8",
+  "selected_algorithm": "hist_gradient_boosting",
+  "selected_threshold": 0.6449999999999999,
+  "mlflow_run_ids": {
+    "selected_model": "e7063d1311d34e72914555d3d9b65127"
+  },
+  "model_sha256": "8bba624739e5443accb684de19c1a5a9064a874299f4bc79f5b2cabfe8e267a5"
+}

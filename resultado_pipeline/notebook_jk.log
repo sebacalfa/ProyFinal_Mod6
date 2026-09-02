@@ -1,0 +1,37 @@
+C:\Users\c3283\Desktop\INCOEX\respositorio25-08-2026\.notebook_runtime\nbformat\validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  _validate(nbdict, ref, version, version_minor, relax_add_props)
+Ejecutando celda 1
+Resultado celda 1: True
+Ejecutando celda 2
+Resultado celda 2: True
+Ejecutando celda 3
+Resultado celda 3: True
+Ejecutando celda 4
+Resultado celda 4: True
+Ejecutando celda 5
+Resultado celda 5: True
+Ejecutando celda 6
+Resultado celda 6: True
+Ejecutando celda 7
+Resultado celda 7: True
+Ejecutando celda 8
+Resultado celda 8: True
+Ejecutando celda 9
+Resultado celda 9: True
+Ejecutando celda 10
+Resultado celda 10: True
+Ejecutando celda 11
+Resultado celda 11: True
+Ejecutando celda 12
+Resultado celda 12: True
+Ejecutando celda 13
+Resultado celda 13: True
+Ejecutando celda 14
+Resultado celda 14: True
+Ejecutando celda 15
+Resultado celda 15: True
+Ejecutando celda 16
+Resultado celda 16: True
+Ejecutando celda 17
+Resultado celda 17: True
+Notebook ejecutado; todas las comprobaciones pasaron.

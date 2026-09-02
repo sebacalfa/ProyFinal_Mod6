@@ -1,0 +1,73 @@
+{
+  "model_name": "adult-income-classifier",
+  "version": "8",
+  "run_id": "e7063d1311d34e72914555d3d9b65127",
+  "model_uri": "models:/adult-income-classifier/8",
+  "policy": {
+    "minimum_cv_average_precision": 0.8,
+    "minimum_cv_f1": 0.65,
+    "minimum_gain_over_baseline": 0.1,
+    "maximum_cv_average_precision_std": 0.03
+  },
+  "policy_version": "academic-v1",
+  "selection_rule": "Mayor media de la métrica primaria en CV; empate por nombre de algoritmo.",
+  "scope": "Aprobación académica local. El test se reporta, no selecciona ni ajusta los gates.",
+  "events": [
+    {
+      "stage": "Experiment",
+      "status": "completed",
+      "at_utc": "2026-09-02T18:31:56.261176+00:00"
+    },
+    {
+      "stage": "Candidate",
+      "status": "selected",
+      "at_utc": "2026-09-02T18:31:56.370309+00:00",
+      "algorithm": "hist_gradient_boosting"
+    },
+    {
+      "stage": "Validation",
+      "status": "running",
+      "at_utc": "2026-09-02T18:31:56.456294+00:00"
+    },
+    {
+      "stage": "Validation",
+      "status": "passed",
+      "at_utc": "2026-09-02T18:31:56.937553+00:00"
+    },
+    {
+      "stage": "Production",
+      "status": "approved",
+      "at_utc": "2026-09-02T18:31:57.056234+00:00",
+      "alias": "production"
+    }
+  ],
+  "stage": "Production",
+  "status": "approved",
+  "decision": {
+    "passed": true,
+    "checks": {
+      "cv_average_precision": {
+        "actual": 0.8264062069026981,
+        "minimum": 0.8,
+        "passed": true
+      },
+      "cv_f1": {
+        "actual": 0.7145247586571487,
+        "minimum": 0.65,
+        "passed": true
+      },
+      "gain_over_baseline": {
+        "actual": 0.5869872676527866,
+        "minimum": 0.1,
+        "passed": true
+      },
+      "cv_average_precision_std": {
+        "actual": 0.009684425312091755,
+        "maximum": 0.03,
+        "passed": true
+      }
+    }
+  },
+  "registry_roundtrip_passed": true,
+  "export_directory": "C:\\Users\\c3283\\Desktop\\INCOEX\\respositorio25-08-2026\\resultado_pipeline\\modelo\\production\\version_8"
+}

@@ -12,7 +12,11 @@ import argparse
 import hashlib
 import json
 import sqlite3
-from dataclasses import asdict, dataclass
+from urllib.parse import urlparse
+from urllib.request import url2pathname
+from dataclasses import asdict, dataclass, field
+from importlib.metadata import distributions
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -43,9 +47,11 @@ from sklearn.pipeline import Pipeline
 try:
     from .pipeline_datos import PipelineConfig as DataPipelineConfig
     from .pipeline_datos import construir_pipeline, ejecutar_pipeline
+    from .model_registry import PromotionPolicy, promover_y_exportar
 except ImportError:  # Permite ejecutar: python src/pipeline_ML.py
     from pipeline_datos import PipelineConfig as DataPipelineConfig
     from pipeline_datos import construir_pipeline, ejecutar_pipeline
+    from model_registry import PromotionPolicy, promover_y_exportar
 
 
 @dataclass(frozen=True)
@@ -59,6 +65,7 @@ class MLPipelineConfig:
     tracking_uri: str = "sqlite:///mlflow.db"
     artifact_location: str | None = None
     registered_model_name: str = "adult-income-classifier"
+    promotion_policy: PromotionPolicy = field(default_factory=PromotionPolicy)
 
 
 SCORING = {
@@ -74,6 +81,18 @@ SCORING = {
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _registrar_archivo_verificado(mlflow: Any, archivo: str, artifact_path: str) -> None:
+    """Comprueba la copia local antes de dar por terminado el run."""
+    mlflow.log_artifact(archivo, artifact_path=artifact_path)
+    uri = urlparse(mlflow.get_artifact_uri())
+    if uri.scheme != "file":
+        return
+    base = Path(url2pathname(("//" + uri.netloc if uri.netloc else "") + uri.path))
+    destino = base / artifact_path / Path(archivo).name
+    if not destino.is_file() or _sha256(destino) != _sha256(Path(archivo)):
+        raise RuntimeError(f"MLflow no conservó una copia íntegra del artefacto: {destino}")
 
 
 def _resolver_ruta_local(value: str | Path, base: Path = PROJECT_ROOT) -> Path:
@@ -184,15 +203,12 @@ def _sha256(path: Path) -> str:
 
 def _calcular_version_codigo() -> str:
     """Calcula un hash del código utilizado para datos y modelado."""
-    archivos_codigo = [
-        Path(__file__).resolve(),
-        Path(__file__).resolve().with_name("pipeline_datos.py"),
-    ]
+    archivos_codigo = sorted(Path(__file__).resolve().parent.rglob("*.py"))
 
     digest = hashlib.sha256()
 
     for archivo in archivos_codigo:
-        digest.update(archivo.name.encode("utf-8"))
+        digest.update(archivo.relative_to(PROJECT_ROOT).as_posix().encode("utf-8"))
         digest.update(archivo.read_bytes())
 
     return digest.hexdigest()
@@ -205,6 +221,7 @@ def comparar_modelos(
     data_config: DataPipelineConfig,
     ml_config: MLPipelineConfig,
     candidatos: dict[str, Any] | None = None,
+    evidencias: dict[str, np.ndarray] | None = None,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Compara candidatos solo con validación cruzada estratificada."""
     candidatos = candidatos or construir_candidatos(ml_config.random_state)
@@ -225,8 +242,14 @@ def comparar_modelos(
             scoring=SCORING,
             n_jobs=1,
             return_train_score=False,
+            return_estimator=evidencias is not None,
             error_score="raise",
         )
+        if evidencias is not None:
+            probabilities = np.empty(len(y_train), dtype=float)
+            for fitted, (_, validation_index) in zip(scores["estimator"], cv.split(X_train, y_train)):
+                probabilities[validation_index] = fitted.predict_proba(X_train.iloc[validation_index])[:, 1]
+            evidencias[name] = probabilities
         row: dict[str, Any] = {"algorithm": name}
         row["hyperparameters"] = json.dumps(
             estimator.get_params(deep=False), default=str, sort_keys=True
@@ -239,7 +262,7 @@ def comparar_modelos(
         rows.append(row)
 
     comparison = pd.DataFrame(rows).sort_values(
-        f"cv_{ml_config.primary_metric}_mean", ascending=False
+        [f"cv_{ml_config.primary_metric}_mean", "algorithm"], ascending=[False, True]
     ).reset_index(drop=True)
     return comparison, candidatos
 
@@ -340,6 +363,7 @@ def _guardar_graficos(
     y_test: pd.Series,
     probabilities: np.ndarray,
     predictions: np.ndarray,
+    dataset_label: str = "conjunto de prueba",
 ) -> list[Path]:
     try:
         import matplotlib.pyplot as plt
@@ -354,7 +378,7 @@ def _guardar_graficos(
     ConfusionMatrixDisplay.from_predictions(
         y_test, predictions, display_labels=["<=50K", ">50K"], cmap="Blues"
     )
-    plt.title("Matriz de confusión — conjunto de prueba")
+    plt.title(f"Matriz de confusión — {dataset_label}")
     plt.tight_layout()
     plt.savefig(cm_path, dpi=160)
     plt.close()
@@ -389,6 +413,8 @@ def _registrar_mlflow(
     config: MLPipelineConfig,
     data_config: DataPipelineConfig,
     data_version: str,
+    data_output: Path,
+    evidencias: dict[str, np.ndarray],
 ) -> dict[str, str]:
     """Registra candidatos y modelo final con trazabilidad completa."""
     try:
@@ -404,17 +430,51 @@ def _registrar_mlflow(
     run_ids: dict[str, str] = {}
     code_version = _calcular_version_codigo()
 
-    archivos_codigo = [
-        Path(__file__).resolve(),
-        Path(__file__).resolve().with_name("pipeline_datos.py"),
-    ]
+    archivos_codigo = sorted(Path(__file__).resolve().parent.rglob("*.py"))
 
-    notebook_path = Path.cwd() / "J_Modelo_y_Experimentacion.ipynb"
+    notebook_path = PROJECT_ROOT / "J_Modelo_y_Experimentacion.ipynb"
+
+    from mlflow.tracking import MlflowClient
+    client = MlflowClient(tracking_uri=mlflow.get_tracking_uri())
+    lineage_files = [data_output / name for name in (
+        "adult_raw.csv", "adult_clean.csv", "X_train_raw.csv", "X_test_raw.csv",
+        "y_train.csv", "y_test.csv", "nombres_features.csv", "manifest.json",
+    )]
+    for path in lineage_files:
+        if not path.is_file():
+            raise FileNotFoundError(f"Falta evidencia reproducible: {path}")
+    lineage = {path.name: _sha256(path) for path in lineage_files}
+    (output / "data_lineage.json").write_text(json.dumps(lineage, indent=2), encoding="utf-8")
+    environment = {"python": sys.version, "packages": sorted(
+        f"{d.metadata['Name']}=={d.version}" for d in distributions() if d.metadata['Name'])}
+    (output / "environment.json").write_text(json.dumps(environment, indent=2), encoding="utf-8")
+    features = {"raw_columns": list(X_train.columns), "raw_dtypes": X_train.dtypes.astype(str).to_dict(),
+                "transformed_columns": selected_model.named_steps["features"].named_steps[
+                    "preprocessor"].get_feature_names_out().tolist()}
+    (output / "feature_schema.json").write_text(json.dumps(features, indent=2), encoding="utf-8")
+
+    def log_lineage():
+        mlflow.set_tag("lifecycle_stage", "Experiment")
+        for path in lineage_files:
+            _registrar_archivo_verificado(mlflow, str(path), "data")
+        for name in ("data_lineage.json", "environment.json", "feature_schema.json"):
+            _registrar_archivo_verificado(mlflow, str(output / name), "traceability")
+
+    def log_model_verified(model):
+        info = mlflow.sklearn.log_model(
+            model, name="model", input_example=X_train.head(5),
+            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+            code_paths=[str(Path(__file__).resolve().parent)],
+        )
+        restored = mlflow.sklearn.load_model(info.model_uri)
+        np.testing.assert_allclose(restored.predict_proba(X_train.head(10)),
+                                   model.predict_proba(X_train.head(10)), rtol=1e-10, atol=1e-12)
+        mlflow.set_tag("model_roundtrip_verified", "true")
+        return info
 
     artefactos_comunes = [
         output / "comparacion_modelos_cv.csv",
         output / "comparacion_modelos_cv.png",
-        output / "configuracion_ml.json",
     ]
 
     # ---------------------------------------------------------
@@ -435,6 +495,7 @@ def _registrar_mlflow(
 
         with mlflow.start_run(run_name=f"cv_{algorithm}") as run:
             run_ids[algorithm] = run.info.run_id
+            log_lineage()
 
             parametros_base = {
                 "algorithm": algorithm,
@@ -454,6 +515,7 @@ def _registrar_mlflow(
             hyperparameters = json.loads(
                 str(row["hyperparameters"])
             )
+            mlflow.log_param("hyperparameters", json.dumps(hyperparameters, sort_keys=True))
 
             mlflow.log_params({
                 f"model_{key}": str(value)[:500]
@@ -468,36 +530,47 @@ def _registrar_mlflow(
             }
 
             mlflow.log_metrics(metricas_cv)
+            mlflow.set_tag("evaluation_dataset", "out_of_fold_train")
+            evidence_dir = output / "candidates" / algorithm
+            evidence_dir.mkdir(parents=True, exist_ok=True)
+            probabilities = evidencias[algorithm]
+            predictions = (probabilities >= 0.5).astype(int)
+            _guardar_graficos(evidence_dir, y_train, probabilities, predictions,
+                              dataset_label="validación cruzada (OOF train), umbral 0.5")
+            pd.DataFrame(confusion_matrix(y_train, predictions, labels=[0, 1])).to_csv(
+                evidence_dir / "matriz_confusion.csv", index=False)
+            pd.DataFrame({"y_true": y_train, "probability": probabilities,
+                          "prediction": predictions}).to_csv(evidence_dir / "predicciones_oof.csv", index=False)
+            (evidence_dir / "configuracion.json").write_text(json.dumps({
+                "algorithm": algorithm, "hyperparameters": hyperparameters,
+                "data_config": asdict(data_config), "ml_config": asdict(config),
+                "evaluation_dataset": "out_of_fold_train", "threshold": 0.5,
+                "metrics_definition": "Promedios por fold; la matriz agrupa todas las predicciones OOF.",
+            }, indent=2, default=str), encoding="utf-8")
+            for path in evidence_dir.iterdir():
+                if path.is_file():
+                    _registrar_archivo_verificado(mlflow, str(path), "evaluation")
 
             for artefacto in artefactos_comunes:
                 if artefacto.exists():
-                    mlflow.log_artifact(
+                    _registrar_archivo_verificado(mlflow,
                         str(artefacto),
                         artifact_path="experiment_evidence",
                     )
 
             for archivo_codigo in archivos_codigo:
-                mlflow.log_artifact(
+                _registrar_archivo_verificado(mlflow,
                     str(archivo_codigo),
-                    artifact_path="source_code",
+                    artifact_path="source_code/" + archivo_codigo.relative_to(PROJECT_ROOT).parent.as_posix(),
                 )
 
             if notebook_path.exists():
-                mlflow.log_artifact(
+                _registrar_archivo_verificado(mlflow,
                     str(notebook_path),
                     artifact_path="source_code",
                 )
 
-            mlflow.sklearn.log_model(
-                candidate_pipeline,
-                name="model",
-                serialization_format=(
-                    mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE
-                ),
-                code_paths=[
-                    str(Path(__file__).resolve().parent)
-                ],
-            )
+            log_model_verified(candidate_pipeline)
 
     # ---------------------------------------------------------
     # Run final del modelo seleccionado
@@ -507,6 +580,8 @@ def _registrar_mlflow(
         run_name=f"selected_{selected_name}"
     ) as run:
         run_ids["selected_model"] = run.info.run_id
+        log_lineage()
+        mlflow.set_tag("evaluation_dataset", "held_out_test")
 
         parametros_finales = {
             "algorithm": selected_name,
@@ -528,6 +603,8 @@ def _registrar_mlflow(
         selected_estimator = selected_model.named_steps[
             "classifier"
         ]
+        mlflow.log_param("hyperparameters", json.dumps(
+            selected_estimator.get_params(deep=False), sort_keys=True, default=str))
 
         mlflow.log_params({
             f"model_{key}": str(value)[:500]
@@ -550,36 +627,32 @@ def _registrar_mlflow(
                     # Se escribe con los run_ids definitivos después de cerrar
                     # este run y se incorpora entonces mediante MlflowClient.
                     "manifest_modelo.json",
+                    "registry_lifecycle.json",
                 }
             ):
-                mlflow.log_artifact(
+                _registrar_archivo_verificado(mlflow,
                     str(artifact),
                     artifact_path="evaluation",
                 )
 
         for archivo_codigo in archivos_codigo:
-            mlflow.log_artifact(
+            _registrar_archivo_verificado(mlflow,
                 str(archivo_codigo),
-                artifact_path="source_code",
+                artifact_path="source_code/" + archivo_codigo.relative_to(PROJECT_ROOT).parent.as_posix(),
             )
 
         if notebook_path.exists():
-            mlflow.log_artifact(
+            _registrar_archivo_verificado(mlflow,
                 str(notebook_path),
                 artifact_path="source_code",
             )
 
-        mlflow.sklearn.log_model(
-            selected_model,
-            name="model",
-            serialization_format=(
-                mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE
-            ),
-            code_paths=[
-                str(Path(__file__).resolve().parent)
-            ],
-            registered_model_name=config.registered_model_name,
-        )
+        info = log_model_verified(selected_model)
+        promover_y_exportar(client=client, model_info=info, run_id=run.info.run_id,
+                            model_name=config.registered_model_name, comparison=comparison,
+                            selected_name=selected_name, selected_model=selected_model,
+                            sample=X_train.head(32), threshold=metrics["threshold"],
+                            output=output, policy=config.promotion_policy)
 
     return run_ids
 
@@ -596,7 +669,8 @@ def ejecutar_pipeline_ml(
     """Ejecuta datos → comparación → selección → evaluación → MLflow."""
     data_config = data_config or DataPipelineConfig()
     ml_config = ml_config or MLPipelineConfig()
-    output = Path(ml_output_dir)
+    output = _resolver_ruta_local(ml_output_dir)
+    data_output_dir = _resolver_ruta_local(data_output_dir)
     output.mkdir(parents=True, exist_ok=True)
 
     data_result = ejecutar_pipeline(
@@ -609,26 +683,15 @@ def ejecutar_pipeline_ml(
     y_train = data_result["y_train"]
     y_test = data_result["y_test"]
 
+    evidencias: dict[str, np.ndarray] = {}
     comparison, candidates = comparar_modelos(
-        X_train, y_train, data_config=data_config, ml_config=ml_config
+        X_train, y_train, data_config=data_config, ml_config=ml_config, evidencias=evidencias
     )
     selected_name = str(comparison.iloc[0]["algorithm"])
     selected_estimator = candidates[selected_name]
     selected_pipeline = construir_pipeline_modelo(selected_estimator, data_config)
 
-    cv = StratifiedKFold(
-        n_splits=ml_config.cv_folds,
-        shuffle=True,
-        random_state=ml_config.random_state,
-    )
-    oof_probabilities = cross_val_predict(
-        selected_pipeline,
-        X_train,
-        y_train,
-        cv=cv,
-        method="predict_proba",
-        n_jobs=1,
-    )[:, 1]
+    oof_probabilities = evidencias[selected_name]
     threshold, threshold_table = seleccionar_umbral(
         y_train,
         oof_probabilities,
@@ -719,6 +782,8 @@ def ejecutar_pipeline_ml(
             config=ml_config,
             data_config=data_config,
             data_version=data_version,
+            data_output=Path(data_output_dir),
+            evidencias=evidencias,
         )
 
     manifest = {
@@ -732,6 +797,8 @@ def ejecutar_pipeline_ml(
         "data_config": asdict(data_config),
         "ml_config": asdict(ml_config),
         "mlflow_run_ids": run_ids,
+        "registry": (json.loads((output / "registry_lifecycle.json").read_text(encoding="utf-8"))
+                     if enable_mlflow else None),
         "artifacts": sorted(path.name for path in output.iterdir()),
     }
     (output / "manifest_modelo.json").write_text(

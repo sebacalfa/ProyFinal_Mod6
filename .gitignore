@@ -5,3 +5,6 @@ __pycache__/
 .pytest_cache/
 .env
 mlartifacts/
+backups/
+.notebook_runtime/
+resultado_pipeline/demo_batches/

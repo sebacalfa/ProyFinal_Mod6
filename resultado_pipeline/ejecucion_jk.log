@@ -1,0 +1,171 @@
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_name" in PromptModelConfig has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+2026/09/02 12:30:42 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+2026/09/02 12:31:06 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+2026/09/02 12:31:21 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+2026/09/02 12:31:37 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+2026/09/02 12:31:47 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+C:\Users\c3283\Desktop\INCOEX\fase6 proyecto integrador\mlflow-lab\Lib\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+Registered model 'adult-income-classifier' already exists. Creating a new version of this model...
+Created version '8' of model 'adult-income-classifier'.
+{
+  "created_at_utc": "2026-09-02T18:31:57.163500+00:00",
+  "selected_algorithm": "hist_gradient_boosting",
+  "selection_metric": "average_precision",
+  "selected_threshold": 0.6449999999999999,
+  "test_metrics": {
+    "threshold": 0.6449999999999999,
+    "precision": 0.6847988077496274,
+    "recall": 0.7868150684931506,
+    "f1": 0.7322709163346613,
+    "roc_auc": 0.9331584725436779,
+    "average_precision": 0.8406640269639136,
+    "balanced_accuracy": 0.8364148099135115
+  },
+  "data_version_sha256": "7dc84f5b49c0db8850e232cc6d0c73575aeea05c84e61e7f10bca9c49d8ec970",
+  "code_version_sha256": "f18c3eea4060019107a9aea21d0c50dec8bb7e42a25323d05e3f3930902f304f",
+  "data_config": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "min_category_frequency": 100,
+    "minimum_rows": 30000
+  },
+  "ml_config": {
+    "random_state": 42,
+    "cv_folds": 5,
+    "primary_metric": "average_precision",
+    "threshold_objective": "f1",
+    "minimum_precision": null,
+    "experiment_name": "adult_income_classification",
+    "tracking_uri": "sqlite:///mlflow.db",
+    "artifact_location": null,
+    "registered_model_name": "adult-income-classifier",
+    "promotion_policy": {
+      "minimum_cv_average_precision": 0.8,
+      "minimum_cv_f1": 0.65,
+      "minimum_gain_over_baseline": 0.1,
+      "maximum_cv_average_precision_std": 0.03
+    }
+  },
+  "mlflow_run_ids": {
+    "hist_gradient_boosting": "e6ec2aabf8c2441480a950e4d2868831",
+    "random_forest": "f72599e3669344c2a5da8cde2cbc3a33",
+    "logistic_regression": "02eed309a9ca44bdbad21a9b278d337b",
+    "dummy_baseline": "b7cd24096fa741deb6197022ecaa854e",
+    "selected_model": "e7063d1311d34e72914555d3d9b65127"
+  },
+  "registry": {
+    "model_name": "adult-income-classifier",
+    "version": "8",
+    "run_id": "e7063d1311d34e72914555d3d9b65127",
+    "model_uri": "models:/adult-income-classifier/8",
+    "policy": {
+      "minimum_cv_average_precision": 0.8,
+      "minimum_cv_f1": 0.65,
+      "minimum_gain_over_baseline": 0.1,
+      "maximum_cv_average_precision_std": 0.03
+    },
+    "policy_version": "academic-v1",
+    "selection_rule": "Mayor media de la m�trica primaria en CV; empate por nombre de algoritmo.",
+    "scope": "Aprobaci�n acad�mica local. El test se reporta, no selecciona ni ajusta los gates.",
+    "events": [
+      {
+        "stage": "Experiment",
+        "status": "completed",
+        "at_utc": "2026-09-02T18:31:56.261176+00:00"
+      },
+      {
+        "stage": "Candidate",
+        "status": "selected",
+        "at_utc": "2026-09-02T18:31:56.370309+00:00",
+        "algorithm": "hist_gradient_boosting"
+      },
+      {
+        "stage": "Validation",
+        "status": "running",
+        "at_utc": "2026-09-02T18:31:56.456294+00:00"
+      },
+      {
+        "stage": "Validation",
+        "status": "passed",
+        "at_utc": "2026-09-02T18:31:56.937553+00:00"
+      },
+      {
+        "stage": "Production",
+        "status": "approved",
+        "at_utc": "2026-09-02T18:31:57.056234+00:00",
+        "alias": "production"
+      }
+    ],
+    "stage": "Production",
+    "status": "approved",
+    "decision": {
+      "passed": true,
+      "checks": {
+        "cv_average_precision": {
+          "actual": 0.8264062069026981,
+          "minimum": 0.8,
+          "passed": true
+        },
+        "cv_f1": {
+          "actual": 0.7145247586571487,
+          "minimum": 0.65,
+          "passed": true
+        },
+        "gain_over_baseline": {
+          "actual": 0.5869872676527866,
+          "minimum": 0.1,
+          "passed": true
+        },
+        "cv_average_precision_std": {
+          "actual": 0.009684425312091755,
+          "maximum": 0.03,
+          "passed": true
+        }
+      }
+    },
+    "registry_roundtrip_passed": true,
+    "export_directory": "C:\\Users\\c3283\\Desktop\\INCOEX\\respositorio25-08-2026\\resultado_pipeline\\modelo\\production\\version_8"
+  },
+  "artifacts": [
+    "busqueda_umbral_oof.csv",
+    "candidates",
+    "comparacion_modelos_cv.csv",
+    "comparacion_modelos_cv.png",
+    "configuracion_ml.json",
+    "curvas_roc_pr.png",
+    "data_lineage.json",
+    "environment.json",
+    "feature_schema.json",
+    "manifest_modelo.json",
+    "matriz_confusion.csv",
+    "matriz_confusion.png",
+    "metricas_subgrupos_sex.csv",
+    "metricas_test.json",
+    "modelo_clasificacion.joblib",
+    "predicciones_test.csv",
+    "production",
+    "registry_lifecycle.json"
+  ]
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import os
 import time
@@ -26,14 +27,19 @@ from src.pipeline_datos import AdultFeatureEngineer  # noqa: F401
 logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+PRODUCTION_ROOT = BASE_DIR / "resultado_pipeline" / "modelo" / "production"
+CURRENT_POINTER = PRODUCTION_ROOT / "current.json"
+PRODUCTION_DIR = PRODUCTION_ROOT
+if CURRENT_POINTER.is_file():
+    current = json.loads(CURRENT_POINTER.read_text(encoding="utf-8"))
+    PRODUCTION_DIR = (PRODUCTION_ROOT / current["directory"]).resolve()
+    PRODUCTION_DIR.relative_to(PRODUCTION_ROOT.resolve())
 
 MODEL_PATH = Path(
     os.getenv(
         "MODEL_PATH",
         str(
-            BASE_DIR
-            / "resultado_pipeline"
-            / "modelo"
+            PRODUCTION_DIR
             / "modelo_clasificacion.joblib"
         ),
     )
@@ -43,9 +49,7 @@ MANIFEST_PATH = Path(
     os.getenv(
         "MANIFEST_PATH",
         str(
-            BASE_DIR
-            / "resultado_pipeline"
-            / "modelo"
+            PRODUCTION_DIR
             / "manifest_modelo.json"
         ),
     )
@@ -107,6 +111,9 @@ def load_artifacts() -> None:
                 encoding="utf-8"
             )
         )
+        expected_hash = manifest.get("model_sha256")
+        if expected_hash is not None and hashlib.sha256(MODEL_PATH.read_bytes()).hexdigest() != expected_hash:
+            raise ValueError("El modelo no coincide con la exportación aprobada del Registry.")
 
         THRESHOLD = float(
             manifest.get(
@@ -128,11 +135,7 @@ def load_artifacts() -> None:
             .get("selected_model", "unknown")
         )
 
-        MODEL_VERSION = (
-            str(run_id)[:8]
-            if run_id
-            else "unknown"
-        )
+        MODEL_VERSION = str(manifest.get("registered_model_version") or str(run_id)[:8] or "unknown")
 
     except (
         OSError,
@@ -143,6 +146,7 @@ def load_artifacts() -> None:
         logger.exception(
             "No fue posible procesar el manifiesto"
         )
+        model = None
 
 
 @asynccontextmanager

@@ -1,0 +1,6 @@
+"age","workclass","fnlwgt","education","education-num","marital-status","occupation","relationship","race","sex","capital-gain","capital-loss","hours-per-week","native-country"
+"84","Private","188328","HS-grad","9","Widowed","Prof-specialty","Not-in-family","White","Female","0","0","16","United-States"
+"25","Private","71351","1st-4th","2","Never-married","Other-service","Other-relative","White","Male","0","0","25","El-Salvador"
+"39","Private","204501","Masters","14","Married-civ-spouse","Exec-managerial","Husband","White","Male","0","0","50","United-States"
+"54","Private","115602","HS-grad","9","Married-civ-spouse","Other-service","Wife","Black","Female","0","0","40","United-States"
+"53","Private","287317","HS-grad","9","Divorced","Other-service","Not-in-family","Black","Male","0","0","40","United-States"

@@ -35,7 +35,7 @@ El script de ingesta descarga los datos desde UCI, por lo que no es obligatorio 
 | Feature engineering reutilizable | Implementado | `AdultFeatureEngineer` y pipeline de scikit-learn |
 | Modelado y experimentación | Implementado | `src/pipeline_ML.py` y notebook J |
 | MLflow Tracking | Implementado | `mlflow.db`, `mlruns/` y registro desde el pipeline |
-| Model Registry | Implementado en el entrenamiento | Nombre registrado: `adult-income-classifier` |
+| Model Registry | Ciclo Experiment → Candidate → Validation → Production | `adult-income-classifier`, gates y exportación de versión aprobada |
 | Docker | Implementado | `Dockerfile` y `requirements-api.txt` |
 | API de inferencia | Implementada | `src/api/main.py` con `/health`, `/predict` y `/monitoring/system` |
 | Pruebas automatizadas | Implementadas | `tests/test_data.py`, `tests/test_model.py`, `tests/test_api.py` y `tests/test_monitoring.py` |
@@ -218,6 +218,61 @@ La selección usa cinco folds estratificados y **Average Precision** como métri
 
 ## 11. MLflow
 
+### Evidencias de J y K
+
+Ejecute `python -m src.pipeline_ML --raw-path resultado_pipeline/adult_raw.csv`
+desde la raíz del proyecto. La ejecución crea cuatro runs candidatos y un run
+final; conserva las ejecuciones anteriores. Se requiere MLflow instalado.
+
+**J — Experiment Tracking.** Cada candidato registra `algorithm`,
+`hyperparameters`, `feature_set`, `random_seed`, `data_version`, métricas promedio
+de cinco folds estratificados y su pipeline entrenado. En `evaluation/` conserva
+su configuración, predicciones out-of-fold, matriz de confusión y curvas ROC/PR.
+La matriz agrupa predicciones OOF a umbral 0.5; las métricas del run son medias por
+fold, por lo que no son necesariamente idénticas a las calculadas sobre la matriz
+agrupada. El run final registra la evaluación en test al umbral elegido en train.
+Todos los runs incluyen snapshots de datos y particiones (`data/`), hashes,
+nombres de features y versiones del entorno (`traceability/`) y código fuente.
+Los modelos de MLflow 3 se muestran también como modelos asociados al run;
+se comprueba su carga y sus probabilidades después de guardarlos.
+
+**K — Model Registry.** `src/model_registry.py` registra el ganador y conserva
+en `registry/registry_lifecycle.json` el historial con fecha de cada transición:
+`Experiment → Candidate → Validation → Production`. Los alias de MLflow
+`candidate`, `validation` y `production` señalan las versiones que alcanzaron
+esas etapas. Pueden apuntar a una misma versión; el historial es la evidencia del
+orden de las decisiones. Se usan alias y etiquetas en lugar de los antiguos stages.
+
+La selección maximiza la media de la métrica primaria en CV (Average Precision
+por defecto); un empate se resuelve por nombre de algoritmo. La política
+académica `academic-v1`, configurable en `MLPipelineConfig.promotion_policy`, exige:
+
+| Criterio de aprobación | Límite |
+|---|---|
+| Average Precision promedio en CV | ≥ 0.80 |
+| F1 promedio en CV a umbral 0.5 | ≥ 0.65 |
+| Mejora de Average Precision sobre Dummy | ≥ 0.10 |
+| Desviación estándar de Average Precision en CV | ≤ 0.03 |
+| Modelo descargado desde Registry | Carga y reproduce las probabilidades |
+| Exportación para la API | Carga y reproduce las probabilidades |
+
+Estos límites son una decisión académica explícita incorporada al proyecto,
+no límites prescritos por el profesor ni una validación comercial independiente.
+El test no interviene en los gates. Si una métrica falta, no es finita o incumple
+su límite, la versión queda en Validation con rechazo documentado; no se cambia
+la versión de producción anterior.
+
+La versión aprobada se descarga desde `models:/adult-income-classifier/<versión>`
+y se exporta a `resultado_pipeline/modelo/production/version_<versión>/`.
+`production/current.json` identifica la exportación vigente. La API y Docker usan
+esa exportación, su umbral y su versión de Registry; verifican el hash del modelo.
+El alias Production representa aprobación local para servir, no un despliegue
+automático en un servidor externo. Después de un nuevo entrenamiento, reconstruya
+la imagen Docker para incluir la exportación actual.
+
+Abra `MLflow_Tracking_y_Model_Registry.ipynb` para mostrar los runs, artefactos,
+criterios, historial y alias. Referencia: [alias y flujos de Model Registry](https://mlflow.org/docs/latest/ml/model-registry/workflow).
+
 El tracking utiliza SQLite mediante `sqlite:///mlflow.db`. Para abrir la interfaz:
 
 ```powershell
@@ -225,6 +280,26 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
 Después visite [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+### Conservación y recuperación de artefactos locales
+
+Inicie MLflow desde la raíz de este repositorio para usar la base correcta:
+`mlflow.db` (no `miflow.db`). Los metadatos y los archivos se guardan por separado.
+Respalde juntos `mlflow.db`, `mlartifacts/`, `mlruns/` y `resultado_pipeline/`,
+con el entrenamiento y MLflow detenidos. `mlartifacts/` está excluida de Git;
+una copia del repositorio hecha solamente con Git no conserva esa carpeta.
+Al mover el proyecto, las rutas absolutas de los runs históricos también
+necesitan revisión. Reiniciar la computadora no debería eliminar los archivos.
+
+Si faltan los artefactos del último run seleccionado pero se conservan sus
+resultados locales, ejecute `python -m src.recuperar_artefactos_locales`.
+El recuperador comprueba el manifiesto y las métricas contra la base de datos,
+restaura la evaluación sin sobrescribir archivos distintos y verifica las copias
+con SHA-256. No reconstruye los modelos del Registry ni los runs candidatos:
+para ellos se necesita el respaldo original o una nueva ejecución del entrenamiento.
+El entrenamiento verifica ahora las copias locales de gráficos, configuración
+y código inmediatamente después de registrarlas; esta comprobación no sustituye
+un respaldo ante eliminaciones posteriores.
 
 El experimento se llama `adult_income_classification` y el modelo seleccionado se registra como `adult-income-classifier`. Los runs guardan:
 
@@ -285,17 +360,28 @@ La imagen contiene la API, el pipeline entrenado, el manifiesto y las dependenci
 
 ```powershell
 docker build -t adult-income-api .
-docker run --rm -p 8001:8000 adult-income-api
+docker run --rm -p 8011:8010 adult-income-api
 ```
 
-La documentación interactiva queda disponible en `http://127.0.0.1:8001/docs`. El puerto 8001 pertenece al equipo y el 8000 permanece dentro del contenedor.
+La documentación de Docker queda disponible en `http://127.0.0.1:8011/docs`. Docker publica su puerto interno 8010 en el puerto 8011 del equipo; la demo local puede seguir abierta en 8010.
 
 ## 16. API de inferencia
+
+La demo y la API comparten el puerto **8010**. Para abrir ambas juntas:
+
+```powershell
+python -m uvicorn demo.app:app --host 127.0.0.1 --port 8010
+```
+
+Use [la demo](http://127.0.0.1:8010), [Swagger](http://127.0.0.1:8010/docs),
+[salud](http://127.0.0.1:8010/health) y [monitoreo](http://127.0.0.1:8010/monitoring/system).
+Si la demo ya está abierta, pruebe la API desde ese mismo servidor. La demo,
+la API independiente y Docker son alternativas: ejecute solo una a la vez en 8010.
 
 La aplicación está en `src/api/main.py`. Carga una sola vez el pipeline completo y expone `GET /health`, `POST /predict` y `GET /monitoring/system`. Para ejecutarla localmente:
 
 ```powershell
-python -m uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8001
+python -m uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
 La entrada valida campos obligatorios, tipos, campos adicionales, cadenas vacías y rangos de negocio. La respuesta contiene:
@@ -308,7 +394,9 @@ La entrada valida campos obligatorios, tipos, campos adicionales, cadenas vacía
 }
 ```
 
-La API carga `resultado_pipeline/modelo/modelo_clasificacion.joblib`; no recrea manualmente las transformaciones.
+La API lee `resultado_pipeline/modelo/production/current.json` y carga el modelo
+de la carpeta `version_<versión>` indicada allí. Esa copia se exportó desde Registry
+después de la aprobación; conserva el pipeline completo de transformaciones.
 
 ## 17. Testing
 
@@ -367,7 +455,7 @@ Con la API en ejecución, las métricas operativas se consultan así:
 
 ```powershell
 Invoke-RestMethod `
-    -Uri "http://127.0.0.1:8001/monitoring/system" `
+    -Uri "http://127.0.0.1:8010/monitoring/system" `
     -Method Get
 ```
 
@@ -535,18 +623,17 @@ docker build -t grupo2-mlops .
 ### 19.12 Ejecutar la API con Docker
 
 ```powershell
-docker run --rm -p 8001:8000 grupo2-mlops
+docker run --rm -p 8011:8010 grupo2-mlops
 ```
 
 Servicios disponibles:
 
-- API: [http://127.0.0.1:8001](http://127.0.0.1:8001).
-- Documentación Swagger: [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs).
-- Estado del modelo: [http://127.0.0.1:8001/health](http://127.0.0.1:8001/health).
-- Monitoreo del sistema: [http://127.0.0.1:8001/monitoring/system](http://127.0.0.1:8001/monitoring/system).
+- API: [http://127.0.0.1:8011](http://127.0.0.1:8011).
+- Documentación Swagger: [http://127.0.0.1:8011/docs](http://127.0.0.1:8011/docs).
+- Estado del modelo: [http://127.0.0.1:8011/health](http://127.0.0.1:8011/health).
+- Monitoreo del sistema: [http://127.0.0.1:8011/monitoring/system](http://127.0.0.1:8011/monitoring/system).
 
-El puerto `8000` corresponde al interior del contenedor y `8001` al equipo
-anfitrión.
+El mapeo `8011:8010` publica la API Docker en 8011 y conserva 8010 dentro del contenedor. La demo local sigue en 8010.
 
 ### 19.13 Configuración reproducible
 
