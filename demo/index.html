@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/demo-requirements.css">
   <style>
     /* La retícula del hero es decorativa y no debe interceptar los botones. */
     .hero::before { pointer-events: none; }
@@ -20,6 +21,7 @@
     <div class="brand"><span class="brand-mark">AI</span><div><strong>Adult Income</strong><small>MLOps · Grupo 2</small></div></div>
     <nav aria-label="Navegación principal">
       <button class="nav-item active" data-view="overview"><span>⌂</span>Resumen</button>
+      <button class="nav-item" data-view="guided"><span>▶</span>Recorrido</button>
       <button class="nav-item" data-view="prediction"><span>✦</span>Predicción</button>
       <button class="nav-item" data-view="model"><span>◇</span>Modelo</button>
       <button class="nav-item" data-view="monitoring"><span>⌁</span>Monitoreo</button>
@@ -33,7 +35,7 @@
 
     <section class="view active" id="overview">
       <div class="hero">
-        <div><span class="eyebrow light">MLOPS END-TO-END</span><h1>De datos crudos a una<br><em>predicción observable.</em></h1><p>Una vista ejecutiva del clasificador Adult / Census Income, construida con los resultados reales del proyecto.</p><div class="hero-actions"><button class="primary" data-go="prediction">Probar el modelo <span>→</span></button><button class="ghost" data-go="pipeline">Ver arquitectura</button></div></div>
+        <div><span class="eyebrow light">PROYECTO MLOPS · GRUPO 2</span><h1>De los datos a una<br><em>predicción que podemos supervisar.</em></h1><p>Aquí mostramos cómo preparamos los datos, entrenamos el modelo, hacemos una predicción y revisamos su comportamiento en producción.</p><div class="hero-actions"><button class="primary" data-go="prediction">Hacer una predicción <span>→</span></button><button class="ghost" data-go="guided">Ver el recorrido</button></div></div>
         <div class="model-orbit"><div class="orbit-ring"></div><div class="orbit-core"><small>MODELO ACTUAL</small><strong>HGB</strong><span>HistGradientBoosting</span></div><span class="orbit-dot one"></span><span class="orbit-dot two"></span></div>
       </div>
       <div class="metric-grid">
@@ -46,6 +48,36 @@
         <article class="card story"><div class="card-head"><div><span class="eyebrow">VISIÓN GENERAL</span><h2>El recorrido del dato</h2></div><span class="badge">5 etapas</span></div><div class="mini-flow"><div><b>01</b><span>Ingesta</span><small>UCI Adult</small></div><i>→</i><div><b>02</b><span>Calidad</span><small>Quality gates</small></div><i>→</i><div><b>03</b><span>Features</span><small>63 variables</small></div><i>→</i><div><b>04</b><span>Modelo</span><small>4 candidatos</small></div><i>→</i><div><b>05</b><span>Producción</span><small>API + drift</small></div></div></article>
         <article class="card distribution"><div class="card-head"><div><span class="eyebrow">DATASET</span><h2>Composición de datos</h2></div></div><div class="donut-wrap"><div class="donut" id="donut"><span><strong id="rows">—</strong><small>registros</small></span></div><div class="legend"><p><i class="blue-dot"></i><span>Ingreso ≤ 50K</span><strong id="negativePct">—</strong></p><p><i class="green-dot"></i><span>Ingreso &gt; 50K</span><strong id="positivePct">—</strong></p><hr><p><span>Duplicados removidos</span><strong id="duplicates">—</strong></p></div></div></article>
       </div>
+    </section>
+
+    <section class="view" id="guided">
+      <div class="page-title"><div><span class="eyebrow">RECORRIDO DE LA EXPOSICIÓN</span><h1>Así funciona nuestro proyecto</h1><p>Estos son los pasos que mostraremos durante la demostración, en el mismo orden solicitado.</p></div><span class="status-pill">● Listo para presentar</span></div>
+      <div class="demo-sequence" aria-label="Flujo de la demostración">
+        <button data-stage="raw"><b>01</b><span>Datos originales</span><small>48,842 filas</small></button><i>↓</i>
+        <button data-stage="validation"><b>02</b><span>Revisión de calidad</span><small>Reglas automáticas</small></button><i>↓</i>
+        <button data-stage="training"><b>03</b><span>Entrenamiento</span><small>4 modelos comparados</small></button><i>↓</i>
+        <button data-stage="mlflow"><b>04</b><span>Experimentos</span><small>Seguimiento en MLflow</small></button><i>↓</i>
+        <button data-stage="registry"><b>05</b><span>Registro del modelo</span><small>Versión seleccionada</small></button><i>↓</i>
+        <button data-stage="docker"><b>06</b><span>Contenedor</span><small>Servicio reproducible</small></button><i>↓</i>
+        <button data-stage="api"><b>07</b><span>Predicción</span><small>Un caso nuevo</small></button><i>↓</i>
+        <button data-stage="monitoring"><b>08</b><span>Monitoreo</span><small>Sistema · Datos · Modelo</small></button><i>↓</i>
+        <button data-stage="alerts"><b>09</b><span>Alertas</span><small>Drift y calidad</small></button>
+      </div>
+      <div class="demo-support-grid">
+        <article class="card"><span class="eyebrow">PRUEBA EN VIVO</span><h2>Probar un caso nuevo</h2><p>Completamos los datos de una persona y mostramos la predicción, la probabilidad y la versión del modelo.</p><button class="primary" data-go="prediction">Ir a la predicción <span>→</span></button></article>
+        <article class="card"><span class="eyebrow">DATOS INCORRECTOS</span><h2>Qué pasa cuando algo está mal</h2><p>Si falta la edad o se escribe un valor fuera del rango, la API rechaza la solicitud y explica el error.</p><span class="evidence-chip">Error 422 · datos no válidos</span></article>
+        <article class="card"><span class="eyebrow">DECISIÓN FINAL</span><h2>Cuándo revisar el modelo</h2><p>Un cambio en los datos genera una alerta. Solo proponemos reentrenar si el rendimiento también empeora.</p><span class="evidence-chip warning">La decisión requiere revisión humana</span></article>
+      </div>
+    </section>
+
+    <section class="view" id="stage-detail">
+      <button class="back-demo" data-go="guided">← Volver al recorrido</button>
+      <div class="stage-hero"><span class="stage-number" id="stageNumber">01</span><div><span class="eyebrow" id="stageEyebrow">EVIDENCIA</span><h1 id="stageTitle">Raw Data</h1><p id="stageIntro"></p></div></div>
+      <div class="stage-layout">
+        <article class="card"><span class="eyebrow">QUÉ MOSTRAR</span><h2 id="stageShowTitle"></h2><div id="stageEvidence" class="evidence-list"></div></article>
+        <article class="card command-card"><span class="eyebrow">COMANDO DE LA DEMO</span><h2>Ejecutar o explicar</h2><pre><code id="stageCommand"></code></pre><button class="copy-command" id="copyCommand">Copiar comando</button></article>
+      </div>
+      <article class="card stage-result"><span class="eyebrow">RESULTADO ESPERADO</span><h2 id="stageExpected"></h2><p id="stageExplanation"></p><div id="stageActions" class="stage-actions"></div></article>
     </section>
 
     <section class="view" id="prediction">

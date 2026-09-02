@@ -8,6 +8,9 @@ producción deben importar ``ejecutar_pipeline`` o ``AdultFeaturePipeline``.
 from __future__ import annotations
 
 import json
+import os
+import time
+import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,6 +52,36 @@ class PipelineConfig:
     random_state: int = 42
     min_category_frequency: int = 100
     minimum_rows: int = 30_000
+
+
+def _guardar_csv_atomico(
+    data: pd.DataFrame | pd.Series,
+    destination: str | Path,
+    *,
+    index: bool = False,
+    attempts: int = 6,
+) -> None:
+    """Escribe un CSV completo y tolera bloqueos breves típicos de Windows."""
+    target = Path(destination)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(
+        f".{target.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
+    )
+    try:
+        data.to_csv(temporary, index=index)
+        for attempt in range(attempts):
+            try:
+                os.replace(temporary, target)
+                return
+            except OSError as exc:
+                if attempt == attempts - 1:
+                    raise OSError(
+                        f"No se pudo actualizar '{target}'. Cierre Excel u otro "
+                        "programa que tenga abierto el archivo y vuelva a intentar."
+                    ) from exc
+                time.sleep(0.2 * (attempt + 1))
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def ingerir_adult(raw_path: str | Path | None = None) -> pd.DataFrame:
@@ -247,7 +280,7 @@ def ejecutar_pipeline(
     output.mkdir(parents=True, exist_ok=True)
 
     raw = ingerir_adult(raw_path)
-    raw.to_csv(output / "adult_raw.csv", index=False)
+    _guardar_csv_atomico(raw, output / "adult_raw.csv")
     normalized = normalizar_dataset(raw)
     raw_report = validar_dataset(
         normalized, stage="raw", minimum_rows=config.minimum_rows,
@@ -260,7 +293,7 @@ def ejecutar_pipeline(
         clean, stage="clean", minimum_rows=config.minimum_rows,
         allow_missing_features=True,
     )
-    clean.to_csv(output / "adult_clean.csv", index=False)
+    _guardar_csv_atomico(clean, output / "adult_clean.csv")
 
     X = clean.drop(columns=TARGET)
     y = clean[TARGET].astype("int8")
@@ -272,8 +305,12 @@ def ejecutar_pipeline(
     # Se conservan las particiones sin transformar para auditoría, análisis de
     # subgrupos y construcción de un pipeline ML end-to-end. No contienen el
     # target y mantienen exactamente las filas utilizadas en cada conjunto.
-    X_train.reset_index(drop=True).to_csv(output / "X_train_raw.csv", index=False)
-    X_test.reset_index(drop=True).to_csv(output / "X_test_raw.csv", index=False)
+    _guardar_csv_atomico(
+        X_train.reset_index(drop=True), output / "X_train_raw.csv"
+    )
+    _guardar_csv_atomico(
+        X_test.reset_index(drop=True), output / "X_test_raw.csv"
+    )
 
     pipeline = construir_pipeline(config)
     train_matrix = pipeline.fit_transform(X_train, y_train)
@@ -295,13 +332,14 @@ def ejecutar_pipeline(
     quality_report = pd.concat(
         [raw_report, clean_report, transform_report], ignore_index=True
     )
-    quality_report.to_csv(output / "reporte_calidad.csv", index=False)
-    train_features.to_csv(output / "X_train_transformado.csv", index=False)
-    test_features.to_csv(output / "X_test_transformado.csv", index=False)
-    y_train.reset_index(drop=True).to_csv(output / "y_train.csv", index=False)
-    y_test.reset_index(drop=True).to_csv(output / "y_test.csv", index=False)
-    pd.Series(train_features.columns, name="feature").to_csv(
-        output / "nombres_features.csv", index=False
+    _guardar_csv_atomico(quality_report, output / "reporte_calidad.csv")
+    _guardar_csv_atomico(train_features, output / "X_train_transformado.csv")
+    _guardar_csv_atomico(test_features, output / "X_test_transformado.csv")
+    _guardar_csv_atomico(y_train.reset_index(drop=True), output / "y_train.csv")
+    _guardar_csv_atomico(y_test.reset_index(drop=True), output / "y_test.csv")
+    _guardar_csv_atomico(
+        pd.Series(train_features.columns, name="feature"),
+        output / "nombres_features.csv",
     )
     joblib.dump(pipeline, output / "pipeline_features.joblib")
 

@@ -13,6 +13,7 @@
     "minimum_precision": null,
     "experiment_name": "adult_income_classification",
     "tracking_uri": "sqlite:///mlflow.db",
+    "artifact_location": null,
     "registered_model_name": "adult-income-classifier"
   },
   "selected_algorithm": "hist_gradient_boosting",

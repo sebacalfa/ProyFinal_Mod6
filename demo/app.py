@@ -10,7 +10,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from src.api.main import PredictRequest, PredictResponse, load_artifacts, predict
+from src.api.main import (
+    PredictRequest,
+    PredictResponse,
+    load_artifacts,
+    predict,
+    system_monitor,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +50,24 @@ def home() -> FileResponse:
 def summary() -> dict:
     data = read_json(PIPELINE_DIR / "manifest.json")
     model = read_json(MODEL_DIR / "manifest_modelo.json")
+    model_config = read_json(MODEL_DIR / "configuracion_ml.json")
+    model_comparison = pd.read_csv(
+        MODEL_DIR / "comparacion_modelos_cv.csv"
+    ).astype(object).where(
+        lambda frame: pd.notna(frame), None
+    ).to_dict(orient="records")
+    subgroup_metrics = pd.read_csv(
+        MODEL_DIR / "metricas_subgrupos_sex.csv"
+    ).astype(object).where(
+        lambda frame: pd.notna(frame), None
+    ).to_dict(orient="records")
     monitoring = read_json(MONITORING_DIR / "monitoring_report.json")
+    quality = read_json(MONITORING_DIR / "quality_incident.json")
+    retraining = read_json(MONITORING_DIR / "retrain_decision.json")
+    batches_frame = pd.read_csv(MONITORING_DIR / "monitoring_summary.csv")
+    batches = batches_frame.astype(object).where(
+        pd.notna(batches_frame), None
+    ).to_dict(orient="records")
     predictions = pd.read_csv(MODEL_DIR / "predicciones_test.csv")
     target_column = next((c for c in predictions if c.lower() in {"y_true", "actual", "income"}), None)
     predicted_column = next((c for c in predictions if c.lower() in {"y_pred", "prediction", "predicted"}), None)
@@ -59,9 +82,23 @@ def summary() -> dict:
     return {
         "data": data,
         "model": model,
+        "model_config": model_config,
+        "model_comparison": model_comparison,
+        "subgroup_metrics": subgroup_metrics,
         "monitoring": monitoring,
+        "system_monitoring": system_monitor.snapshot(),
+        "quality_incident": quality,
+        "retraining": retraining,
+        "production_batches": batches,
         "distribution": distribution,
     }
+
+
+@app.get("/demo-api/system-monitoring")
+def demo_system_monitoring() -> dict:
+    """Métricas operativas vivas para la pantalla de demostración."""
+
+    return system_monitor.snapshot()
 
 
 @app.post("/demo-api/predict", response_model=PredictResponse)

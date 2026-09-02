@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +30,7 @@ from sklearn.metrics import (
     balanced_accuracy_score,
     confusion_matrix,
     f1_score,
+    make_scorer,
     precision_recall_curve,
     precision_score,
     recall_score,
@@ -55,6 +57,7 @@ class MLPipelineConfig:
     minimum_precision: float | None = None
     experiment_name: str = "adult_income_classification"
     tracking_uri: str = "sqlite:///mlflow.db"
+    artifact_location: str | None = None
     registered_model_name: str = "adult-income-classifier"
 
 
@@ -62,10 +65,74 @@ SCORING = {
     "average_precision": "average_precision",
     "roc_auc": "roc_auc",
     "f1": "f1",
-    "precision": "precision",
+    # Algunos folds del baseline no predicen la clase positiva. Eso es un
+    # resultado valido (precision 0), no una condicion excepcional.
+    "precision": make_scorer(precision_score, zero_division=0),
     "recall": "recall",
     "balanced_accuracy": "balanced_accuracy",
 }
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _resolver_ruta_local(value: str | Path, base: Path = PROJECT_ROOT) -> Path:
+    """Resuelve rutas relativas contra el proyecto, no contra el usuario/CWD."""
+    path = Path(value).expanduser()
+    return path.resolve() if path.is_absolute() else (base / path).resolve()
+
+
+def _resolver_tracking_uri(tracking_uri: str) -> str:
+    """Convierte un backend SQLite relativo en una URI absoluta y portable."""
+    prefix = "sqlite:///"
+    if not tracking_uri.startswith(prefix):
+        return tracking_uri
+    database = tracking_uri.removeprefix(prefix)
+    return f"{prefix}{_resolver_ruta_local(database).as_posix()}"
+
+
+def _preparar_experimento_mlflow(mlflow: Any, config: MLPipelineConfig) -> str:
+    """Crea o reubica el experimento local para que una copia sea ejecutable.
+
+    MLflow guarda ``artifact_location`` dentro de SQLite. Si se copia el
+    proyecto, ese valor puede conservar ``C:/Users/<otra persona>/...``. Para
+    el backend local se normaliza a ``mlartifacts`` dentro del repositorio.
+    """
+    from mlflow.tracking import MlflowClient
+
+    tracking_uri = _resolver_tracking_uri(config.tracking_uri)
+    mlflow.set_tracking_uri(tracking_uri)
+    client = MlflowClient(tracking_uri=tracking_uri)
+
+    artifact_location = config.artifact_location
+    if artifact_location is None and tracking_uri.startswith("sqlite:///"):
+        artifact_location = str(PROJECT_ROOT / "mlartifacts")
+    if artifact_location is not None:
+        artifact_location = _resolver_ruta_local(artifact_location).as_uri()
+
+    experiment = client.get_experiment_by_name(config.experiment_name)
+    if experiment is None:
+        experiment_id = client.create_experiment(
+            config.experiment_name,
+            artifact_location=artifact_location,
+        )
+    else:
+        experiment_id = experiment.experiment_id
+        if (
+            artifact_location is not None
+            and experiment.artifact_location != artifact_location
+            and tracking_uri.startswith("sqlite:///")
+        ):
+            database = Path(tracking_uri.removeprefix("sqlite:///"))
+            with sqlite3.connect(database) as connection:
+                connection.execute(
+                    "UPDATE experiments SET artifact_location = ? "
+                    "WHERE experiment_id = ?",
+                    (artifact_location, experiment_id),
+                )
+
+    mlflow.set_experiment(experiment_id=experiment_id)
+    return tracking_uri
 
 
 def construir_candidatos(random_state: int = 42) -> dict[str, Any]:
@@ -332,8 +399,7 @@ def _registrar_mlflow(
             "MLflow es obligatorio. Instale con: pip install mlflow"
         ) from exc
 
-    mlflow.set_tracking_uri(config.tracking_uri)
-    mlflow.set_experiment(config.experiment_name)
+    _preparar_experimento_mlflow(mlflow, config)
 
     run_ids: dict[str, str] = {}
     code_version = _calcular_version_codigo()
@@ -677,7 +743,9 @@ def ejecutar_pipeline_ml(
     if enable_mlflow and run_ids.get("selected_model"):
         from mlflow.tracking import MlflowClient
 
-        client = MlflowClient(tracking_uri=ml_config.tracking_uri)
+        client = MlflowClient(
+            tracking_uri=_resolver_tracking_uri(ml_config.tracking_uri)
+        )
         client.log_artifact(
             run_ids["selected_model"],
             str(output / "manifest_modelo.json"),
