@@ -401,19 +401,175 @@ pytest tests/test_retrain_trigger.py -v
 
 ## 19. Reproducibilidad y trazabilidad
 
+El proyecto permite reproducir el flujo completo desde la descarga de los datos
+hasta el entrenamiento, monitoreo y despliegue del modelo. El repositorio oficial
+se encuentra en [GitHub](https://github.com/sebacalfa/ProyFinal_Mod6.git).
+
+Todos los comandos siguientes deben ejecutarse desde la carpeta raíz del
+repositorio.
+
+### 19.1 Clonar el repositorio
+
+```powershell
+git clone https://github.com/sebacalfa/ProyFinal_Mod6.git
+cd ProyFinal_Mod6
+```
+
+### 19.2 Crear y activar el entorno virtual
+
+Se recomienda Python 3.11, 3.12 o 3.13.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 19.3 Instalar las dependencias
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
+```
+
+`requirements.txt` contiene las dependencias de ingesta, procesamiento,
+entrenamiento, visualización y MLflow. `requirements-dev.txt` agrega las
+dependencias de la API, monitoreo y pruebas automatizadas.
+
+### 19.4 Ejecutar la ingesta
+
+```powershell
+python src/ingesta.py
+```
+
+Este comando descarga el dataset Adult Income desde UCI y genera
+`src/adult_raw.csv`. La descarga requiere conexión a internet.
+
+### 19.5 Entrenar y evaluar los modelos
+
+Con registro de experimentos en MLflow:
+
+```powershell
+python src/pipeline_ML.py --raw-path src/adult_raw.csv
+```
+
+Para ejecutar el entrenamiento sin registrar nuevos experimentos:
+
+```powershell
+python src/pipeline_ML.py --raw-path src/adult_raw.csv --no-mlflow
+```
+
+El pipeline prepara los datos, realiza feature engineering, compara modelos,
+selecciona el umbral de clasificación y genera los artefactos en
+`resultado_pipeline/` y `resultado_pipeline/modelo/`.
+
+### 19.6 Ejecutar las pruebas automatizadas
+
+Suite completa:
+
+```powershell
+python -m pytest tests/ -v
+```
+
+Pruebas por componente:
+
+```powershell
+python -m pytest tests/test_data.py -v
+python -m pytest tests/test_model.py -v
+python -m pytest tests/test_api.py -v
+python -m pytest tests/test_monitoring.py -v
+python -m pytest tests/test_retrain_trigger.py -v
+```
+
+### 19.7 Simular producción y detectar drift
+
+```powershell
+python -m src.simulate_production --batches 6 --batch-size 1000 --random-state 42
+```
+
+La simulación compara la distribución de referencia contra seis lotes de
+producción y calcula PSI, Kolmogorov-Smirnov y distancia Wasserstein. Los
+resultados se guardan en `resultado_pipeline/monitoring/`.
+
+### 19.8 Simular problemas de calidad
+
+```powershell
+python -m src.quality_simulation --reference resultado_pipeline/adult_clean.csv --batch resultado_pipeline/monitoring/production_batch_1.csv --output resultado_pipeline/monitoring/quality_incident.json
+```
+
+La prueba contamina únicamente una copia en memoria con missing values, una
+fila duplicada, un outlier extremo, un datatype incorrecto, una categoría
+desconocida y una modificación de esquema. El sistema detecta los seis
+problemas, bloquea el batch y registra el incidente sin modificar ni guardar la
+copia contaminada. El resultado queda en
+`resultado_pipeline/monitoring/quality_incident.json`.
+
+### 19.9 Evaluar la estrategia de reentrenamiento
+
+```powershell
+python -m src.retrain_trigger --batches-dir resultado_pipeline/monitoring --output resultado_pipeline/monitoring/retrain_decision.json
+```
+
+La decisión combina drift, degradación del desempeño y volumen mínimo. El
+resultado es una recomendación que siempre requiere aprobación manual; el
+proyecto no reentrena automáticamente solo porque cambie una distribución.
+
+### 19.10 Iniciar MLflow
+
+```powershell
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
+La interfaz queda disponible en
+[http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+### 19.11 Construir la imagen Docker
+
+El entrenamiento debe ejecutarse antes de construir la imagen, porque el
+`Dockerfile` incorpora el modelo y su manifiesto.
+
+```powershell
+docker build -t grupo2-mlops .
+```
+
+### 19.12 Ejecutar la API con Docker
+
+```powershell
+docker run --rm -p 8001:8000 grupo2-mlops
+```
+
+Servicios disponibles:
+
+- API: [http://127.0.0.1:8001](http://127.0.0.1:8001).
+- Documentación Swagger: [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs).
+- Estado del modelo: [http://127.0.0.1:8001/health](http://127.0.0.1:8001/health).
+- Monitoreo del sistema: [http://127.0.0.1:8001/monitoring/system](http://127.0.0.1:8001/monitoring/system).
+
+El puerto `8000` corresponde al interior del contenedor y `8001` al equipo
+anfitrión.
+
+### 19.13 Configuración reproducible
+
 La configuración central utiliza:
 
 - `random_state=42`.
-- División test de 20 %.
+- División de prueba de 20 %.
 - Cinco folds estratificados.
 - Frecuencia mínima de categorías igual a 100.
-- Versionamiento del dataset limpio mediante SHA-256.
+- Versionamiento SHA-256 del dataset limpio y del código.
+- Manifiestos de datos y modelo dentro de `resultado_pipeline/`.
+- Registro de parámetros, métricas y artefactos mediante MLflow.
 
-Para compartir el trabajo con otro integrante, envíe la carpeta completa o el repositorio. El notebook de modelado depende de `src/pipeline_datos.py`, `src/pipeline_ML.py`, `requirements.txt` y del CSV local cuando se ejecuta sin conexión.
+Los entornos virtuales, cachés y archivos temporales no deben versionarse. Para
+trabajar sin conexión después de la primera ejecución puede reutilizarse el CSV
+guardado localmente.
 
 ## 20. Flujo Git recomendado
 
-La carpeta revisada no contiene actualmente un repositorio Git detectable. Antes de la entrega se recomienda inicializar o clonar el repositorio oficial y trabajar mediante ramas, por ejemplo:
+El proyecto se encuentra versionado en el
+[repositorio oficial](https://github.com/sebacalfa/ProyFinal_Mod6.git). Para
+mantener un historial ordenado se recomienda trabajar mediante ramas, por
+ejemplo:
 
 ```text
 main
@@ -431,9 +587,8 @@ No deben versionarse entornos virtuales, cachés de Python ni archivos temporale
 
 Agregar antes de la entrega:
 
-- Nombre completo - responsabilidad principal.
-- Nombre completo - responsabilidad principal.
-- Nombre completo - responsabilidad principal.
+- Cynthia Montero Sancho.
+- Sebastian Calvo.
 
 ## 22. Próximos pasos para completar el proyecto
 
@@ -442,7 +597,7 @@ Monitoreo, simulación de drift y estrategia/lógica de reentrenamiento ya está
 1. Ejecutar la suite automatizada completa (`pytest tests/ -v`) en el entorno de cada integrante y conservar la evidencia.
 2. Verificar la imagen Docker en una máquina limpia (de menor capacidad que la usada para desarrollarla).
 3. Añadir el diagrama final de arquitectura.
-4. Completar integrantes, URL del repositorio y comandos definitivos de demo.
+4. Completar las responsabilidades de cada integrante y validar los comandos definitivos de demo.
 
 ## 23. Referencias
 

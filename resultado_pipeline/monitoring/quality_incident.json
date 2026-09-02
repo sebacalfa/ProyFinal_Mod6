@@ -1,0 +1,57 @@
+{
+  "simulation_only": true,
+  "original_batch_permanently_modified": false,
+  "original_fingerprint_unchanged": true,
+  "contaminated_rows": 1001,
+  "checks": {
+    "missing_values": {
+      "detected": true,
+      "count": 153
+    },
+    "duplicated_rows": {
+      "detected": true,
+      "count": 1
+    },
+    "extreme_outlier": {
+      "detected": true,
+      "details": {
+        "capital-gain": 1
+      }
+    },
+    "incorrect_datatype": {
+      "detected": true,
+      "details": {
+        "age": 1
+      }
+    },
+    "unknown_category": {
+      "detected": true,
+      "details": {
+        "native-country": [
+          "UNKNOWN_NEW_COUNTRY"
+        ]
+      }
+    },
+    "schema_modification": {
+      "detected": true,
+      "missing_columns": [],
+      "extra_columns": [
+        "unexpected_schema_column"
+      ]
+    }
+  },
+  "detected_incidents": [
+    "missing_values",
+    "duplicated_rows",
+    "extreme_outlier",
+    "incorrect_datatype",
+    "unknown_category",
+    "schema_modification"
+  ],
+  "all_required_incidents_detected": true,
+  "pipeline_decision": "BLOCK",
+  "incident_registered": true,
+  "reference_path": "resultado_pipeline\\adult_clean.csv",
+  "original_batch_path": "resultado_pipeline\\monitoring\\production_batch_1.csv",
+  "contaminated_batch_saved": false
+}
