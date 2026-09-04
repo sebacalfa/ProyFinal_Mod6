@@ -1,17 +1,19 @@
-# Adult Income - Proyecto MLOps End-to-End
+# Adult Income: proyecto MLOps de principio a fin
 
-Proyecto de clasificación para predecir si una persona adulta genera ingresos anuales superiores a USD 50 000 utilizando el dataset **Adult / Census Income** de UCI. El repositorio cubre actualmente la ingesta reproducible, validación de calidad, EDA, feature engineering, comparación de modelos, evaluación y seguimiento de experimentos con MLflow.
+Este proyecto nació como una forma de llevar un modelo de machine learning más allá del notebook. A partir del dataset **Adult / Census Income** de UCI, se entrena un clasificador que estima si el ingreso anual de una persona supera los USD 50 000.
+
+El repositorio reúne el flujo completo: descarga y validación de datos, análisis exploratorio, preparación de variables, comparación de modelos, seguimiento de experimentos con MLflow, una API de inferencia, pruebas automatizadas y monitoreo básico en producción.
 
 ## 1. Problema de negocio
 
-El objetivo es estimar la probabilidad de que una persona pertenezca a la clase `>50K` a partir de variables demográficas, educativas y laborales. Además del desempeño predictivo, el proyecto revisa diferencias de comportamiento del modelo entre los subgrupos `Female` y `Male`.
+El objetivo es estimar la probabilidad de que una persona pertenezca a la clase `>50K` usando variables demográficas, educativas y laborales. También se revisa por separado el desempeño para los grupos `Female` y `Male`, ya que una métrica general puede ocultar diferencias importantes entre subgrupos.
 
 La variable objetivo se codifica de la siguiente forma:
 
 - `0`: ingreso `<=50K`.
 - `1`: ingreso `>50K`.
 
-El resultado debe interpretarse como una herramienta analítica. No debe utilizarse automáticamente para decisiones sensibles sobre personas sin una evaluación adicional de equidad, legalidad y riesgo.
+Este modelo es un ejercicio académico y debe entenderse como una herramienta de análisis. No está diseñado para tomar decisiones sensibles sobre personas. Un uso real exigiría, como mínimo, una revisión más profunda de sesgos, riesgos y requisitos legales.
 
 ## 2. Dataset
 
@@ -25,7 +27,7 @@ El resultado debe interpretarse como una herramienta analítica. No debe utiliza
 
 El script de ingesta descarga los datos desde UCI, por lo que no es obligatorio depender de un CSV preparado manualmente.
 
-## 3. Estado actual del proyecto
+## 3. Qué incluye el proyecto
 
 | Componente | Estado | Evidencia principal |
 |---|---:|---|
@@ -42,7 +44,7 @@ El script de ingesta descarga los datos desde UCI, por lo que no es obligatorio 
 | Monitoreo y simulación de drift | Implementado | `src/monitoring.py` y `src/simulate_production.py` |
 | Estrategia de reentrenamiento (trigger) | Implementado | `src/retrain_trigger.py`, `tests/test_retrain_trigger.py` y `resultado_pipeline/monitoring/retrain_decision.json` |
 
-Esta tabla describe los archivos presentes en el proyecto al momento de elaborar este README; evita confundir entregables planeados con componentes ya implementados.
+La tabla refleja lo que ya está disponible en el repositorio, no una lista de funcionalidades pendientes.
 
 ## 4. Arquitectura implementada
 
@@ -75,7 +77,7 @@ Evaluación final en test + auditoría por sexo
         +------> MLflow Tracking y Model Registry
 ```
 
-El pipeline de entrenamiento contiene también las transformaciones, por lo que el mismo objeto puede recibir datos sin transformar durante inferencia. Esto reduce el riesgo de que el feature engineering del notebook sea diferente al utilizado en producción.
+Las transformaciones forman parte del mismo pipeline que utiliza el modelo. Así, la API puede recibir datos sin transformar y aplicar exactamente la misma preparación usada durante el entrenamiento.
 
 ## 5. Estructura del proyecto
 
@@ -110,7 +112,7 @@ El pipeline de entrenamiento contiene también las transformaciones, por lo que 
         `-- manifest_modelo.json
 ```
 
-Los archivos dentro de `resultado_pipeline/` y `mlruns/` son salidas generadas. Se pueden regenerar ejecutando los pipelines.
+Las carpetas `resultado_pipeline/` y `mlruns/` contienen resultados generados por el flujo y pueden volver a crearse ejecutando los pipelines.
 
 ## 6. Instalación
 
@@ -148,17 +150,17 @@ Para descargar el dataset desde UCI y guardarlo como `src/adult_raw.csv`:
 python src/ingesta.py
 ```
 
-El pipeline principal también descarga el dataset automáticamente cuando no recibe `raw_path`. Para trabajar sin conexión se puede utilizar el CSV incluido en `resultado_pipeline/adult_raw.csv`.
+El pipeline principal también descarga los datos cuando no se indica `raw_path`. Para trabajar sin conexión, se puede reutilizar `resultado_pipeline/adult_raw.csv`.
 
 ## 8. Calidad, limpieza y feature engineering
 
-Ejecute el pipeline de datos desde la raíz:
+Desde la raíz del repositorio, ejecute:
 
 ```powershell
 python src/pipeline_datos.py
 ```
 
-El flujo realiza, entre otras, las siguientes operaciones:
+Durante esta etapa se realizan las siguientes tareas:
 
 - Normalización de espacios, `?`, cadenas vacías y otros indicadores de faltantes.
 - Unificación y codificación binaria de `income`.
@@ -171,29 +173,29 @@ El flujo realiza, entre otras, las siguientes operaciones:
 - Eliminación de `education`, porque duplica la información de `education-num`.
 - Imputación, escalado y codificación One-Hot dentro de un pipeline reutilizable.
 
-Las salidas quedan en `resultado_pipeline/`. El archivo `manifest.json` conserva configuración, dimensiones y lista de artefactos.
+Los resultados se guardan en `resultado_pipeline/`. El archivo `manifest.json` resume la configuración utilizada, las dimensiones de los datos y los artefactos generados.
 
 ## 9. EDA
 
-El análisis exploratorio orientado a decisiones está en `H_EDA_decisiones.ipynb`. Debe abrirse desde la raíz del proyecto:
+El análisis exploratorio está en `H_EDA_decisiones.ipynb` y se puede abrir desde la raíz del proyecto:
 
 ```powershell
 jupyter lab H_EDA_decisiones.ipynb
 ```
 
-El notebook analiza duplicados, faltantes, desbalance, redundancia, asimetría, valores extremos, categorías raras, asociaciones y relaciones no lineales. Sus decisiones se reflejan en `src/pipeline_datos.py`.
+El notebook revisa duplicados, datos faltantes, desbalance de clases, variables redundantes, valores extremos y categorías poco frecuentes. Las decisiones tomadas durante este análisis se trasladaron a `src/pipeline_datos.py`.
 
 ## 10. Entrenamiento y experimentación
 
-### Opción recomendada: notebook independiente
+### Desde el notebook
 
 ```powershell
 jupyter lab J_Modelo_y_Experimentacion.ipynb
 ```
 
-Ejecute las celdas en orden. No es necesario ejecutar antes `Proyecto_Final_Mod6.ipynb`, porque el pipeline ML llama internamente al pipeline de datos.
+Las celdas deben ejecutarse en orden. No hace falta abrir antes `Proyecto_Final_Mod6.ipynb`, porque el entrenamiento prepara los datos internamente.
 
-### Opción por terminal
+### Desde la terminal
 
 Con MLflow habilitado:
 
@@ -356,27 +358,31 @@ El reporte completo se encuentra en `resultado_pipeline/modelo/metricas_subgrupo
 
 ## 15. Docker
 
-La imagen contiene la API, el pipeline entrenado, el manifiesto y las dependencias de inferencia:
+La imagen de Docker reúne la API, el modelo aprobado y todas las dependencias necesarias para hacer predicciones. Antes de construirla debe existir una versión del modelo en `resultado_pipeline/modelo/production/`.
+
+Para crear la imagen a partir del `Dockerfile`:
 
 ```powershell
 docker build -t adult-income-api .
 docker run --rm -p 8011:8010 adult-income-api
 ```
 
-La documentación de Docker queda disponible en `http://127.0.0.1:8011/docs`. Docker publica su puerto interno 8010 en el puerto 8011 del equipo; la demo local puede seguir abierta en 8010.
+El primer comando construye la imagen; el segundo inicia el contenedor. Cuando esté funcionando, la documentación estará en [http://127.0.0.1:8011/docs](http://127.0.0.1:8011/docs).
+
+El mapeo `8011:8010` significa que la aplicación escucha en el puerto 8010 dentro del contenedor, pero se abre desde el puerto 8011 del equipo.
+
 
 ## 16. API de inferencia
 
-La demo y la API comparten el puerto **8010**. Para abrir ambas juntas:
+La demo integra la interfaz y la API en el puerto **8010**. Para iniciarla:
 
 ```powershell
 python -m uvicorn demo.app:app --host 127.0.0.1 --port 8010
 ```
 
-Use [la demo](http://127.0.0.1:8010), [Swagger](http://127.0.0.1:8010/docs),
-[salud](http://127.0.0.1:8010/health) y [monitoreo](http://127.0.0.1:8010/monitoring/system).
-Si la demo ya está abierta, pruebe la API desde ese mismo servidor. La demo,
-la API independiente y Docker son alternativas: ejecute solo una a la vez en 8010.
+Desde ese servidor se puede acceder a [la demo](http://127.0.0.1:8010), [Swagger](http://127.0.0.1:8010/docs), [el estado del modelo](http://127.0.0.1:8010/health) y [el monitoreo](http://127.0.0.1:8010/monitoring/system).
+
+La demo, la API independiente y el contenedor son formas distintas de ejecutar el mismo servicio. No es necesario iniciar las tres al mismo tiempo.
 
 La aplicación está en `src/api/main.py`. Carga una sola vez el pipeline completo y expone `GET /health`, `POST /predict` y `GET /monitoring/system`. Para ejecutarla localmente:
 
@@ -672,21 +678,12 @@ No deben versionarse entornos virtuales, cachés de Python ni archivos temporale
 
 ## 21. Equipo
 
-Agregar antes de la entrega:
-
 - Cynthia Montero Sancho.
 - Sebastian Calvo.
 
-## 22. Próximos pasos para completar el proyecto
 
-Monitoreo, simulación de drift y estrategia/lógica de reentrenamiento ya están implementados y evidenciados (ver secciones 18 y 18.1). Queda pendiente:
 
-1. Ejecutar la suite automatizada completa (`pytest tests/ -v`) en el entorno de cada integrante y conservar la evidencia.
-2. Verificar la imagen Docker en una máquina limpia (de menor capacidad que la usada para desarrollarla).
-3. Añadir el diagrama final de arquitectura.
-4. Completar las responsabilidades de cada integrante y validar los comandos definitivos de demo.
-
-## 23. Referencias
+## 22. Referencias
 
 - Becker, B. y Kohavi, R. (1996). Adult. UCI Machine Learning Repository.
 - [Documentación de scikit-learn](https://scikit-learn.org/stable/).
